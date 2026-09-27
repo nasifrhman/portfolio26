@@ -6,14 +6,17 @@ interface GlassWordsProps {
   className?: string;
   style?: React.CSSProperties;
   id?: string;
+  scatter?: boolean;
 }
 
 /**
  * Recursively parses React nodes and strings, wrapping every individual word
- * in a smooth iPhone glass scale-up span (<span className="word-glass">).
- * Preserves spaces, HTML formatting tags (<strong>, <em>, <span>, <a>), and styling.
+ * in a span (<span className="mag-word">) and each letter in a span (<span className="mag-letter">).
+ * If scatter is true, wraps each letter in an outer <span className="scatter-letter"> for
+ * coordinated scroll-driven typography assembly.
+ * Preserves spaces, HTML formatting tags (<strong>, <em>, <span>, <br>), and styling.
  */
-export function renderGlassWords(node: React.ReactNode, keyPrefix = 'gl'): React.ReactNode {
+export function renderGlassWords(node: React.ReactNode, keyPrefix = 'gl', scatter = false): React.ReactNode {
   if (typeof node === 'string') {
     const tokens = node.split(/(\s+)/);
     return tokens.map((token, wordIdx) => {
@@ -24,11 +27,21 @@ export function renderGlassWords(node: React.ReactNode, keyPrefix = 'gl'): React
       const letters = Array.from(token);
       return (
         <span key={`${keyPrefix}-w-${wordIdx}`} className="mag-word">
-          {letters.map((char, charIdx) => (
-            <span key={`${keyPrefix}-c-${wordIdx}-${charIdx}`} className="mag-letter">
-              {char}
-            </span>
-          ))}
+          {letters.map((char, charIdx) => {
+            const letterSpan = (
+              <span key={`${keyPrefix}-c-${wordIdx}-${charIdx}`} className="mag-letter">
+                {char}
+              </span>
+            );
+            if (scatter) {
+              return (
+                <span key={`${keyPrefix}-s-${wordIdx}-${charIdx}`} className="scatter-letter">
+                  {letterSpan}
+                </span>
+              );
+            }
+            return letterSpan;
+          })}
         </span>
       );
     });
@@ -38,17 +51,27 @@ export function renderGlassWords(node: React.ReactNode, keyPrefix = 'gl'): React
     const str = String(node);
     return (
       <span key={`${keyPrefix}-num`} className="mag-word">
-        {Array.from(str).map((char, i) => (
-          <span key={`${keyPrefix}-num-${i}`} className="mag-letter">
-            {char}
-          </span>
-        ))}
+        {Array.from(str).map((char, i) => {
+          const letterSpan = (
+            <span key={`${keyPrefix}-num-${i}`} className="mag-letter">
+              {char}
+            </span>
+          );
+          if (scatter) {
+            return (
+              <span key={`${keyPrefix}-nums-${i}`} className="scatter-letter">
+                {letterSpan}
+              </span>
+            );
+          }
+          return letterSpan;
+        })}
       </span>
     );
   }
 
   if (Array.isArray(node)) {
-    return node.map((child, i) => renderGlassWords(child, `${keyPrefix}-${i}`));
+    return node.map((child, i) => renderGlassWords(child, `${keyPrefix}-${i}`, scatter));
   }
 
   if (React.isValidElement(node)) {
@@ -57,7 +80,7 @@ export function renderGlassWords(node: React.ReactNode, keyPrefix = 'gl'): React
       return React.cloneElement(
         element,
         undefined,
-        renderGlassWords(element.props.children, `${keyPrefix}-c`)
+        renderGlassWords(element.props.children, `${keyPrefix}-c`, scatter)
       );
     }
   }
@@ -70,11 +93,12 @@ export const GlassWords: React.FC<GlassWordsProps> = ({
   as: Component = 'span',
   className = '',
   style,
-  id
+  id,
+  scatter = false
 }) => {
   return (
     <Component className={className} style={style} id={id}>
-      {renderGlassWords(children)}
+      {renderGlassWords(children, 'gl', scatter)}
     </Component>
   );
 };

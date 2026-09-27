@@ -29,6 +29,7 @@ export const SOCIAL_LINKS: [string, string][] = [
 
 export const NAV_LINKS: [RouteKey, string][] = [
   ['home', 'Home'],
+  ['skills', 'Skill'],
   ['experience', 'Industry' as any] as any,
   ['news', 'News'],
   ['research', 'Research'],
@@ -41,6 +42,7 @@ export const NAV_LINKS: [RouteKey, string][] = [
 
 export const REAL_NAV_LINKS: [RouteKey, string][] = [
   ['home', 'Home'],
+  ['skills', 'Skill'],
   ['industry', 'Experience'],
   ['projects', 'Projects'],
   ['publication', 'Publication'],
@@ -52,6 +54,8 @@ export const REAL_NAV_LINKS: [RouteKey, string][] = [
 
 export const ROUTE_TITLES: Record<RouteKey, string> = {
   home: 'Md. Nasifur Rahman — Software Engineer & Back-End Developer',
+  skills: 'Skills & Technologies | Md. Nasifur Rahman',
+  skill: 'Skills & Technologies | Md. Nasifur Rahman',
   news: 'News | Md. Nasifur Rahman',
   research: 'Research | Md. Nasifur Rahman',
   publication: 'Publications | Md. Nasifur Rahman',

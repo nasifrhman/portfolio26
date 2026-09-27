@@ -6,7 +6,6 @@ import {
   AVATAR_URL,
   EDUCATION_DATA,
   EXPLORE_CARDS,
-  SKILLS_DATA,
   NEWS_DATA
 } from '../data/portfolioData';
 
@@ -111,31 +110,6 @@ export const Home: React.FC = () => {
             ))}
           </div>
         </nav>
-      </section>
-
-      <section className="editorial-section wrap" aria-labelledby="skills-title">
-        <div className="section-heading compact">
-          <div>
-            <GlassWords as="p" className="kicker">Skills &amp; Technologies</GlassWords>
-            <GlassWords as="h2" id="skills-title">What I carry into the work.</GlassWords>
-          </div>
-        </div>
-        <div className="skills-ledger">
-          {SKILLS_DATA.map((skill) => (
-            <article key={skill.title} className="skill-card">
-              <div className="skill-card-header">
-                <GlassWords as="h3">{skill.title}</GlassWords>
-              </div>
-              <div className="skill-tag-cloud">
-                {skill.description.split(',').map((tech) => (
-                  <span key={tech.trim()} className="skill-pill mono word-glass">
-                    {tech.trim()}
-                  </span>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
       </section>
 
       <section className="editorial-section milestones-section wrap" aria-labelledby="milestones-timeline-title">

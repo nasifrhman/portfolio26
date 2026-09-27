@@ -4,6 +4,7 @@ import { ROUTE_TITLES, DISPLAY_NAME } from './data/portfolioData';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './components/Home';
+import { SkillsPage } from './components/SkillsPage';
 import { NewsPage } from './components/NewsPage';
 import { ResearchPage } from './components/ResearchPage';
 import { PublicationsPage } from './components/PublicationsPage';
@@ -16,6 +17,8 @@ import { MagnifyingCursor } from './components/MagnifyingCursor';
 
 const ROUTE_COMPONENTS: Record<RouteKey, React.ComponentType> = {
   home: Home,
+  skills: SkillsPage,
+  skill: SkillsPage,
   news: NewsPage,
   research: ResearchPage,
   publication: PublicationsPage,

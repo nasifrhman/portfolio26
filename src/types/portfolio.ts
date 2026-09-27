@@ -68,6 +68,8 @@ export interface HonorItem {
 
 export type RouteKey =
   | 'home'
+  | 'skills'
+  | 'skill'
   | 'news'
   | 'research'
   | 'publication'

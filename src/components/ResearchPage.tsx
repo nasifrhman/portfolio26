@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageHeader } from './PageHeader';
 import { TimelineList } from './TimelineList';
 import {
   RESEARCH_EXPERIENCE,
@@ -12,14 +13,27 @@ export const ResearchPage: React.FC = () => {
 
   return (
     <>
+      <PageHeader
+        kicker="Research"
+        title={
+          <>
+            Machine Learning &amp; <em>Scientific Research.</em>
+          </>
+        }
+      >
+        <p>
+          Investigating neural computing, model averaging acceleration, and cluster-based algorithms with published work in top-ranked international journals.
+        </p>
+      </PageHeader>
+
       <section className="editorial-section wrap" aria-labelledby="research-path-title">
         <div className="section-heading compact">
           <div>
-            <p className="kicker">§ Research path</p>
-            <h1 id="research-path-title">Research Experience</h1>
+            <p className="kicker">Research Experience</p>
+            <h2 id="research-path-title">Academic &amp; Lab Roles</h2>
           </div>
           <p>
-            I now lead teams through the full lifecycle: framing, study design, execution, evaluation, and writing.
+            Leading research workflows through study framing, design, experimental evaluation, and manuscript preparation.
           </p>
         </div>
         <TimelineList items={RESEARCH_EXPERIENCE} />
@@ -28,7 +42,7 @@ export const ResearchPage: React.FC = () => {
       <section className="editorial-section wrap" aria-labelledby="research-areas-title">
         <div className="section-heading compact">
           <div>
-            <p className="kicker">§ Research areas</p>
+            <p className="kicker">Research Areas</p>
             <h2 id="research-areas-title">Research Interests</h2>
           </div>
         </div>
@@ -46,14 +60,14 @@ export const ResearchPage: React.FC = () => {
       <section className="editorial-section wrap" aria-labelledby="reviewing-title">
         <div className="section-heading compact">
           <div>
-            <p className="kicker">§ Reviewer experience</p>
+            <p className="kicker">Reviewer Experience</p>
             <h2 id="reviewing-title">Reviewer Experience</h2>
             <p className="review-count-summary">
-              I have completed {totalReviews} manuscript reviews across {q1Count} Q1 journals.
+              Completed {totalReviews} manuscript review across {q1Count} Q1 international journal.
             </p>
           </div>
           <p>
-            Reviewing is part of my research practice: test the claim, inspect the evidence, and help make the work more rigorous and legible.
+            Reviewing is part of my research practice: evaluating claims, inspecting experimental evidence, and upholding scientific rigor.
           </p>
         </div>
 

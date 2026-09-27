@@ -1,5 +1,6 @@
 import React from 'react';
 import { ExperienceItem } from '../types/portfolio';
+import { GlassWords } from './GlassWords';
 
 interface TimelineListProps {
   items: ExperienceItem[];
@@ -12,12 +13,12 @@ export const TimelineList: React.FC<TimelineListProps> = ({ items }) => {
         <article key={`${item.title}-${item.period}`} className="timeline-item">
           <div className="timeline-period mono">{item.period}</div>
           <div>
-            <h3>{item.title}</h3>
-            <p className="timeline-org">{item.organization}</p>
+            <GlassWords as="h3">{item.title}</GlassWords>
+            <GlassWords as="p" className="timeline-org">{item.organization}</GlassWords>
             {item.gpa ? (
               <strong className="gpa-highlight timeline-gpa">GPA {item.gpa}</strong>
             ) : null}
-            <p>{item.description}</p>
+            <GlassWords as="p">{item.description}</GlassWords>
           </div>
         </article>
       ))}

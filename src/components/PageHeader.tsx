@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { GlassWords } from './GlassWords';
 
 interface PageHeaderProps {
   kicker: string;
@@ -15,9 +16,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   return (
     <header className={`page-header wrap ${className}`.trim()}>
-      <p className="kicker">§ {kicker}</p>
-      <h1>{title}</h1>
-      {children ? <div className="page-lede">{children}</div> : null}
+      <GlassWords as="p" className="kicker">{kicker}</GlassWords>
+      <GlassWords as="h1">{title}</GlassWords>
+      {children ? <div className="page-lede"><GlassWords>{children}</GlassWords></div> : null}
     </header>
   );
 };

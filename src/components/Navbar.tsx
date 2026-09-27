@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { RouteKey } from '../types/portfolio';
 import { REAL_NAV_LINKS, DISPLAY_NAME } from '../data/portfolioData';
+import { Sun, Moon } from 'lucide-react';
 
 interface NavbarProps {
   activeRoute: RouteKey;
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ activeRoute }) => {
+export const Navbar: React.FC<NavbarProps> = ({ activeRoute, theme = 'dark', onToggleTheme }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -17,7 +20,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activeRoute }) => {
     <header className="site-nav">
       <div className="wrap nav-inner">
         <a className="brand" href="#home" aria-label={`${DISPLAY_NAME}, home`}>
-          <span className="brand-dot" aria-hidden="true" />
           <span>{DISPLAY_NAME}</span>
         </a>
 
@@ -32,6 +34,17 @@ export const Navbar: React.FC<NavbarProps> = ({ activeRoute }) => {
               {label}
             </a>
           ))}
+          {onToggleTheme ? (
+            <button
+              className="theme-toggle-btn"
+              type="button"
+              onClick={onToggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+          ) : null}
         </nav>
 
         <button
@@ -65,6 +78,16 @@ export const Navbar: React.FC<NavbarProps> = ({ activeRoute }) => {
               {label}
             </a>
           ))}
+          {onToggleTheme ? (
+            <button
+              className="mobile-theme-toggle"
+              type="button"
+              onClick={onToggleTheme}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+            </button>
+          ) : null}
         </div>
       </nav>
     </header>

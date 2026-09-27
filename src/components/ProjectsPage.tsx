@@ -9,7 +9,7 @@ export const ProjectsPage: React.FC = () => {
         kicker="Projects"
         title={
           <>
-            Engineering & Client <em>Projects.</em>
+            Engineering &amp; Client <em>Projects.</em>
           </>
         }
       >
@@ -64,7 +64,13 @@ export const ProjectsPage: React.FC = () => {
                 </div>
                 <div>
                   <span className="mono">Stack</span>
-                  <p>{project.stack}</p>
+                  <div className="project-stack-tags">
+                    {project.stack.split('·').map((tech) => (
+                      <span key={tech.trim()} className="project-stack-tag mono">
+                        {tech.trim()}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </aside>
             </article>

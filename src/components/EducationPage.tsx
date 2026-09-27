@@ -1,24 +1,32 @@
 import React from 'react';
+import { PageHeader } from './PageHeader';
 import { TimelineList } from './TimelineList';
 import { EDUCATION_DATA, HONORS_DATA } from '../data/portfolioData';
 
 export const EducationPage: React.FC = () => {
   return (
     <>
-      <section className="editorial-section wrap" aria-labelledby="education-title">
-        <div className="section-heading compact">
-          <div>
-            <p className="kicker">§ Education</p>
-            <h1 id="education-title">Academic Background</h1>
-          </div>
-        </div>
+      <PageHeader
+        kicker="Education"
+        title={
+          <>
+            Academic Foundation &amp; <em>Degrees.</em>
+          </>
+        }
+      >
+        <p>
+          BSc in Computer Science &amp; Engineering from American International University–Bangladesh (AIUB) with research assistantship, top academic standing, and graduation honors.
+        </p>
+      </PageHeader>
+
+      <section className="wrap" aria-label="Academic Degrees Timeline">
         <TimelineList items={EDUCATION_DATA} />
       </section>
 
       <section className="editorial-section wrap" aria-labelledby="honors-title">
         <div className="section-heading compact">
           <div>
-            <p className="kicker">§ Honors and recognition</p>
+            <p className="kicker">Honors &amp; Awards</p>
             <h2 id="honors-title">Recognition Along the Way</h2>
           </div>
         </div>

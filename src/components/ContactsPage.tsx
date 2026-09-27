@@ -22,7 +22,7 @@ export const ContactsPage: React.FC = () => {
       <section className="contact-page wrap" aria-labelledby="contact-details-title">
         <div className="contact-invitation">
           <div>
-            <p className="kicker">§ Direct Channels</p>
+            <p className="kicker">Direct Channels</p>
             <h2 id="contact-details-title">
               Software engineering, backend architecture, and technical consulting.
             </h2>
@@ -34,30 +34,30 @@ export const ContactsPage: React.FC = () => {
 
         <ContactRibbon className="contact-page-links" />
 
-        <div style={{ marginTop: '2.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
-          <div style={{ padding: '1.5rem', background: 'var(--paper-2)', border: '1px solid var(--rule)', borderRadius: '4px' }}>
-            <span className="mono" style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--mid)', letterSpacing: '0.1em' }}>Direct Phone</span>
-            <p style={{ marginTop: '0.5rem', fontWeight: 600, fontSize: '18px' }}>
+        <div className="contact-cards-grid">
+          <div className="contact-direct-card">
+            <span className="mono contact-card-label">Direct Phone</span>
+            <p className="contact-card-val">
               <a href={`tel:${PHONE}`}>{PHONE}</a>
             </p>
           </div>
 
-          <div style={{ padding: '1.5rem', background: 'var(--paper-2)', border: '1px solid var(--rule)', borderRadius: '4px' }}>
-            <span className="mono" style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--mid)', letterSpacing: '0.1em' }}>WhatsApp</span>
-            <p style={{ marginTop: '0.5rem', fontWeight: 600, fontSize: '18px' }}>
+          <div className="contact-direct-card">
+            <span className="mono contact-card-label">WhatsApp</span>
+            <p className="contact-card-val">
               <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">01798552909 ↗</a>
             </p>
           </div>
 
-          <div style={{ padding: '1.5rem', background: 'var(--paper-2)', border: '1px solid var(--rule)', borderRadius: '4px' }}>
-            <span className="mono" style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--mid)', letterSpacing: '0.1em' }}>Location</span>
-            <p style={{ marginTop: '0.5rem', fontWeight: 600, fontSize: '18px' }}>
+          <div className="contact-direct-card">
+            <span className="mono contact-card-label">Location</span>
+            <p className="contact-card-val">
               {LOCATION}
             </p>
           </div>
         </div>
 
-        <div style={{ marginTop: '2.5rem', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--rule)' }}>
+        <div className="contact-map-frame">
           <iframe
             src="https://www.google.com/maps?q=Dhaka+Bangladesh&output=embed"
             width="100%"
@@ -70,14 +70,14 @@ export const ContactsPage: React.FC = () => {
           />
         </div>
 
-        <div style={{ marginTop: '2rem' }}>
+        <div className="contact-action-row">
           <a
-            className="primary-link"
+            className="footer-btn footer-btn-primary"
             href={GMAIL_COMPOSE_URL}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Send an Email <span aria-hidden="true">↗</span>
+            <span>Send an Email Directly ↗</span>
           </a>
         </div>
       </section>

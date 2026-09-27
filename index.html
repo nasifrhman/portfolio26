@@ -7,12 +7,24 @@
       name="description"
       content="Md. Nasifur Rahman is a Software Engineer and Back-End Developer at Sparktech Agency with a BSc in Computer Science & Engineering from AIUB. Author of peer-reviewed research in Springer Neural Computing and Applications."
     />
+    <meta name="theme-color" content="#090d16" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('portfolio_theme');
+          var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch(e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
     <title>Md. Nasifur Rahman — Software Engineer & Back-End Developer</title>
   </head>
   <body>

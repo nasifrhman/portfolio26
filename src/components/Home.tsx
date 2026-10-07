@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MilestonesTimeline } from './MilestonesTimeline';
 import { GlassWords } from './GlassWords';
 import { ActivitySection } from './ActivitySection';
@@ -13,52 +13,114 @@ import {
 } from '../data/portfolioData';
 
 export const Home: React.FC = () => {
+  const heroRef = useRef<HTMLElement>(null);
+  const educationRef = useRef<HTMLElement>(null);
+  const exploreRef = useRef<HTMLElement>(null);
+  const milestonesRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    // Observer for scroll-slide-left sections: Academic foundation, Explore, Milestones
+    // Reveals when scrolling into view, and resets when scrolling away/up
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+          } else {
+            entry.target.classList.remove('is-revealed');
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -30px 0px'
+      }
+    );
+
+    if (educationRef.current) observer.observe(educationRef.current);
+    if (exploreRef.current) observer.observe(exploreRef.current);
+    if (milestonesRef.current) observer.observe(milestonesRef.current);
+
+    // Observer for Hero Section: resets when scrolling down past it, replays when scrolling back up
+    const heroObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('hero-is-revealed');
+          } else {
+            entry.target.classList.remove('hero-is-revealed');
+          }
+        });
+      },
+      {
+        threshold: 0.08
+      }
+    );
+
+    if (heroRef.current) heroObserver.observe(heroRef.current);
+
+    return () => {
+      observer.disconnect();
+      heroObserver.disconnect();
+    };
+  }, []);
+
   return (
     <div className="wrap home-content content-width pt-12 pb-4 sm:pt-16 sm:pb-6 md:pt-20">
       {/* 2-Column Hero Section */}
-      <section className="hero-section mb-14 sm:mb-20 md:mb-24" aria-labelledby="hero-title">
+      <section
+        ref={heroRef}
+        className="hero-section hero-is-revealed mb-14 sm:mb-20 md:mb-24"
+        aria-labelledby="hero-title"
+      >
+        {/* Modern Ethereal Ambient Illumination Mesh */}
+        <div className="hero-ambient-mesh hero-anim-mesh" aria-hidden="true" />
+
         <div className="hero-two-col-grid">
           {/* Left Column: Bio & Identity */}
           <div className="hero-left-col">
-            <img
-              alt={NAME}
-              loading="lazy"
-              width={128}
-              height={128}
-              decoding="async"
-              className="h-32 w-32 rounded-full object-cover border-2 border-[var(--rule)] ring-4 ring-[var(--accent-wash)] shadow-2xl transition-transform hover:scale-105 duration-300"
-              src={AVATAR_URL}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src =
-                  'https://avatars.githubusercontent.com/u/113826897?v=4';
-              }}
-            />
+            <div className="hero-avatar-wrap hero-anim-avatar">
+              <div className="hero-avatar-halo" aria-hidden="true" />
+              <img
+                alt={NAME}
+                loading="lazy"
+                width={128}
+                height={128}
+                decoding="async"
+                className="h-32 w-32 rounded-full object-cover border-2 border-[var(--rule)] ring-4 ring-[var(--accent-wash)] shadow-2xl transition-transform hover:scale-105 duration-300 relative z-10"
+                src={AVATAR_URL}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src =
+                    'https://avatars.githubusercontent.com/u/113826897?v=4';
+                }}
+              />
+            </div>
 
             <h1
               id="hero-title"
-              className="mt-7 text-4xl font-semibold tracking-tight sm:text-5xl"
+              className="mt-7 text-4xl font-semibold tracking-tight sm:text-5xl hero-anim-name"
             >
               {NAME}
             </h1>
 
-            <p className="mt-5 text-xl leading-8 text-muted">
+            <p className="mt-5 text-xl leading-8 text-muted hero-anim-role">
               Software Engineer
             </p>
 
             <div className="article-text mt-8 max-w-3xl hero-bio-text">
-              <p>
+              <p className="hero-anim-bio-1">
                 I build reliable backend systems and clean APIs that don't break when
                 real users show up. My experience spans high-throughput APIs,
                 distributed microservices, cloud infrastructure, AI/ML research, and
                 production web applications.
               </p>
-              <p className="mt-4">
+              <p className="mt-4 hero-anim-bio-2">
                 My go-to stack includes Node.js (sometimes Bun), TypeScript, Express.js,
                 PostgreSQL, MongoDB, Redis, and Docker, backed by solid system design.
               </p>
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center gap-5 text-muted">
+            <div className="mt-8 flex flex-wrap items-center gap-5 text-muted hero-anim-links">
               <a
                 href="https://github.com/nasifrhman"
                 target="_blank"
@@ -180,7 +242,7 @@ export const Home: React.FC = () => {
           </div>
 
           {/* Right Column: Pure 3D Interactive Skill Ball on Desktop only (No Text) */}
-          <div className="hero-right-col" aria-label="Interactive 3D Skill Ball">
+          <div className="hero-right-col hero-anim-ball" aria-label="Interactive 3D Skill Ball">
             <SkillsSphere compact={true} />
           </div>
         </div>
@@ -192,14 +254,18 @@ export const Home: React.FC = () => {
         <ActivitySection />
 
         {/* Academic Foundation / Education */}
-        <section className="hero-education" aria-labelledby="home-education-title">
-          <div className="hero-education-label">
+        <section
+          ref={educationRef}
+          className="hero-education scroll-slide-left-section"
+          aria-labelledby="home-education-title"
+        >
+          <div className="hero-education-label scroll-slide-left-item">
             <GlassWords as="p" className="kicker">Education</GlassWords>
             <GlassWords as="h2" id="home-education-title">Academic foundation.</GlassWords>
           </div>
           <div className="hero-education-list">
             {EDUCATION_DATA.map((item) => (
-              <article key={item.title}>
+              <article key={item.title} className="scroll-slide-left-item">
                 <p className="mono">{item.period}</p>
                 <GlassWords as="h3">{item.title}</GlassWords>
                 <GlassWords as="p" className="hero-education-org">{item.organization}</GlassWords>
@@ -212,14 +278,18 @@ export const Home: React.FC = () => {
         </section>
 
         {/* Continue Exploring Links */}
-        <nav className="hero-explore" aria-labelledby="explore-title">
-          <div className="hero-explore-heading">
+        <nav
+          ref={exploreRef}
+          className="hero-explore scroll-slide-left-section"
+          aria-labelledby="explore-title"
+        >
+          <div className="hero-explore-heading scroll-slide-left-item">
             <GlassWords as="p" className="kicker">Continue exploring</GlassWords>
             <GlassWords as="h2" id="explore-title">See the work in detail.</GlassWords>
           </div>
           <div className="hero-explore-links">
             {EXPLORE_CARDS.map(([route, title, desc]) => (
-              <a key={route} href={`#${route}`}>
+              <a key={route} href={`#${route}`} className="scroll-slide-left-item">
                 <GlassWords as="span" className="serif">{title}</GlassWords>
                 <GlassWords as="small">{desc}</GlassWords>
                 <span className="mono" aria-hidden="true">
@@ -231,8 +301,12 @@ export const Home: React.FC = () => {
         </nav>
 
         {/* Milestones Timeline */}
-        <section className="editorial-section milestones-section" aria-labelledby="milestones-timeline-title">
-          <div className="section-heading compact">
+        <section
+          ref={milestonesRef}
+          className="editorial-section milestones-section scroll-slide-left-section"
+          aria-labelledby="milestones-timeline-title"
+        >
+          <div className="section-heading compact scroll-slide-left-item">
             <div>
               <GlassWords as="p" className="kicker">Timeline</GlassWords>
               <GlassWords as="h2" id="milestones-timeline-title">

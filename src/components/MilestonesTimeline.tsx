@@ -16,18 +16,20 @@ export const MilestonesTimeline: React.FC<MilestonesTimelineProps> = ({ items })
     const entries = container.querySelectorAll<HTMLElement>('.milestone-entry');
     if (!entries.length) return;
 
-    // Use IntersectionObserver to reveal events one by one as user scrolls
+    // Use IntersectionObserver to reveal events as user scrolls down, and reset when scrolled up
     const observer = new IntersectionObserver(
       (observedEntries) => {
         observedEntries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-revealed');
+          } else {
+            entry.target.classList.remove('is-revealed');
           }
         });
       },
       {
-        threshold: 0.25,
-        rootMargin: '0px 0px -60px 0px'
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
       }
     );
 

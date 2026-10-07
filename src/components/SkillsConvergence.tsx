@@ -264,12 +264,12 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
 
   // References for smooth 60-120fps physics loop with scroll scrub
   const rotState = useRef({
-    angleX: 0.22,
-    angleY: 0.35,
+    angleX: 0.16,
+    angleY: -0.3,
     velX: 0,
     velY: 0,
-    targetVelX: 0,
-    targetVelY: 0,
+    targetVelX: 0.009,
+    targetVelY: 0.032,
     lastScrollY: 0,
     scrollProgress: 0,
     isStageActive: false,

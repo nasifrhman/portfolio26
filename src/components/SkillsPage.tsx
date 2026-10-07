@@ -1,6 +1,7 @@
 import React from 'react';
 import { PageHeader } from './PageHeader';
 import { SKILLS_DATA } from '../data/portfolioData';
+import { SkillsConvergence } from './SkillsConvergence';
 
 export const SkillsPage: React.FC = () => {
   return (
@@ -43,6 +44,9 @@ export const SkillsPage: React.FC = () => {
           ))}
         </div>
       </section>
+
+      {/* Interactive Core Stack Logos Showcase with Scroll-Driven Sequential Wave Animation */}
+      <SkillsConvergence />
     </>
   );
 };

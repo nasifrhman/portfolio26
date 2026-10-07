@@ -4,7 +4,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { EMAIL, DISPLAY_NAME, SOCIAL_LINKS } from '../data/portfolioData';
 import { GlassWords } from './GlassWords';
-import { SkillsConvergence } from './SkillsConvergence';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -45,11 +44,17 @@ const SCATTER_PRESETS = [
   { x: 460,  y: 200,  rotate: 26,  scale: 1.12, opacity: 0.65 }, // .: far right bottom
 ];
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  isHome?: boolean;
+}
+
+export const Footer: React.FC<FooterProps> = ({ isHome = false }) => {
   const [copied, setCopied] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    if (!isHome) return;
+
     const footerEl = footerRef.current;
     if (!footerEl) return;
 
@@ -107,7 +112,7 @@ export const Footer: React.FC = () => {
     return () => {
       ctx.revert();
     };
-  }, []);
+  }, [isHome]);
 
   const handleCopyEmail = async () => {
     try {
@@ -120,11 +125,30 @@ export const Footer: React.FC = () => {
     }
   };
 
+  // Subpages render a clean, minimal footer without the Skills ribbon or "Let's Build" CTA
+  if (!isHome) {
+    return (
+      <footer className="site-footer" aria-label="Site Footer">
+        <div className="wrap footer-inner">
+          <div>
+            <p className="footer-thesis">
+              Engineered for <em>production.</em>
+            </p>
+            <a href={`mailto:${EMAIL}`} className="text-link mono">
+              {EMAIL}
+            </a>
+          </div>
+          <div className="footer-meta mono">
+            <span>© 2026 {DISPLAY_NAME}</span>
+            <span>DHAKA, BANGLADESH · UTC+6</span>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <>
-      {/* Dynamic Skills Convergence Band (Scroll-driven scatter-to-line alignment) */}
-      <SkillsConvergence />
-
       {/* Main Architectural Footer */}
       <footer ref={footerRef} className="architectural-footer" aria-labelledby="footer-cta-title">
         <div className="wrap footer-cta-content">

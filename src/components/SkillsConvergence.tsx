@@ -250,199 +250,447 @@ export const SKILL_ITEMS: SkillItem[] = [
   }
 ];
 
-export const SkillsConvergence: React.FC = () => {
+export interface SkillsSphereProps {
+  compact?: boolean;
+}
+
+export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false }) => {
   const stageRef = useRef<HTMLDivElement>(null);
-  const bandRef = useRef<HTMLElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [isGrabbing, setIsGrabbing] = useState(false);
-  const dragStartRef = useRef<{ isDown: boolean; startX: number }>({
-    isDown: false,
-    startX: 0
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const badgeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [activeSkill, setActiveSkill] = useState<SkillItem | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // References for smooth 60-120fps physics loop with scroll scrub
+  const rotState = useRef({
+    angleX: 0.22,
+    angleY: 0.35,
+    velX: 0,
+    velY: 0,
+    targetVelX: 0,
+    targetVelY: 0,
+    lastScrollY: 0,
+    scrollProgress: 0,
+    isStageActive: false,
+    isPointerDown: false,
+    pointerStartX: 0,
+    pointerStartY: 0,
+    lastPointerX: 0,
+    lastPointerY: 0,
+    isHovered: false,
+    userDragOffsetX: 0,
+    userDragOffsetY: 0,
   });
 
-  // Render all 25 unique skill items once (strictly no duplicates)
   const items = SKILL_ITEMS;
 
+  // Pre-calculate normalized Fibonacci sphere coordinates on mount
+  const sphereNodes = useRef<
+    { skill: SkillItem; x: number; y: number; z: number }[]
+  >([]);
+
+  if (sphereNodes.current.length === 0) {
+    const N = items.length; // 25
+    sphereNodes.current = items.map((skill, i) => {
+      // Golden spiral distribution on unit sphere
+      const phi = Math.acos(1 - (2 * (i + 0.5)) / N);
+      const theta = Math.PI * (1 + 5 ** 0.5) * (i + 0.5);
+      const x = Math.cos(theta) * Math.sin(phi);
+      const y = Math.cos(phi);
+      const z = Math.sin(theta) * Math.sin(phi);
+      return { skill, x, y, z };
+    });
+  }
+
   useEffect(() => {
-    const stage = stageRef.current;
-    const band = bandRef.current;
-    const track = trackRef.current;
-    if (!stage || !band || !track) return;
+    rotState.current.lastScrollY = window.scrollY;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const badges = track.querySelectorAll<HTMLElement>('.convergence-badge');
-    if (!badges.length) return;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const deltaY = currentScrollY - rotState.current.lastScrollY;
+      rotState.current.lastScrollY = currentScrollY;
 
-    const ctx = gsap.context(() => {
-      if (prefersReducedMotion) {
-        gsap.set(badges, { y: 0, rotationZ: 0, scale: 1, opacity: 1, force3D: true });
-        return;
-      }
-
-      // Calculate track travel distance dynamically based on screen and track dimensions
-      const getTrackTravel = () => {
-        const screenWidth = window.innerWidth;
-        const trackWidth = track.scrollWidth;
-        const startX = Math.max(140, screenWidth * 0.40);
-        const endX = -(trackWidth - screenWidth * 0.40);
-        return { startX, endX };
-      };
-
-      // Master ScrollTrigger timeline scrubbed smoothly across the 320vh stage
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: stage,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: 0.85,
-          invalidateOnRefresh: true
+      if (compact) {
+        // In Hero compact mode: page scroll smoothly rotates the ball
+        if (Math.abs(deltaY) > 0.5) {
+          rotState.current.targetVelY += deltaY * 0.0016;
+          rotState.current.targetVelX += deltaY * 0.0007;
         }
-      });
+      } else {
+        // In full standalone mode: measure scroll progress through the stage
+        const stage = stageRef.current;
+        if (stage) {
+          const rect = stage.getBoundingClientRect();
+          const stageTop = rect.top;
+          const stageHeight = rect.height;
+          const viewportHeight = window.innerHeight;
+          const scrollDistance = stageHeight - viewportHeight;
 
-      // 1. Horizontal track movement: drives the badges smoothly from right to left across the focal zone
-      tl.fromTo(
-        track,
-        { x: () => getTrackTravel().startX, force3D: true },
-        {
-          x: () => getTrackTravel().endX,
-          ease: 'none',
-          duration: 1,
-          force3D: true
-        },
-        0
-      );
+          if (scrollDistance > 0) {
+            const rawProgress = -stageTop / scrollDistance;
+            const progress = Math.max(0, Math.min(1, rawProgress));
+            rotState.current.scrollProgress = progress;
+            rotState.current.isStageActive = rawProgress >= -0.05 && rawProgress <= 1.05;
+          }
+        }
+      }
+    };
 
-      // 2. Sequential Wave Convergence for each skill badge
-      const totalBadges = badges.length; // 25
-      const waveDuration = 0.20; // 20% of scroll duration for each badge's full wave journey
-      const maxStagger = 0.74; // Last badge enters at 74% scroll, finishes wave at 94%
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
 
-      badges.forEach((badge, idx) => {
-        const isEven = idx % 2 === 0;
-        const startT = (idx / totalBadges) * maxStagger;
-        const midT = startT + waveDuration * 0.50;
+    let animationFrameId: number;
 
-        // Alternating wave crest / trough offsets
-        const initialY = isEven ? -56 : 56;
-        const initialRot = isEven ? 18 : -18;
-        const midY = isEven ? 24 : -24;
-        const midRot = isEven ? -8 : 8;
+    const render = () => {
+      const state = rotState.current;
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
 
-        // Set initial pre-arrival state at t = 0
-        gsap.set(badge, {
-          y: initialY,
-          rotationZ: initialRot,
-          scale: 0.78,
-          opacity: 0.35,
-          force3D: true
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+
+        if (width === 0 || height === 0) {
+          animationFrameId = requestAnimationFrame(render);
+          return;
+        }
+
+        const cx = width / 2;
+        const cy = height / 2;
+
+        // Dynamic sphere radius based on mode and container dimensions
+        const radius = compact
+          ? Math.min(205, Math.max(130, Math.min(width, height) * 0.42))
+          : Math.min(250, Math.max(150, width * 0.30));
+
+        const focalLength = compact ? 490 : 560;
+
+        if (!compact && state.isStageActive && !state.isPointerDown) {
+          const targetAngleY = state.scrollProgress * (Math.PI * 2.8) + state.userDragOffsetY;
+          const targetAngleX = 0.22 + Math.sin(state.scrollProgress * Math.PI) * 0.40 + state.userDragOffsetX;
+
+          state.angleY += (targetAngleY - state.angleY) * 0.075;
+          state.angleX += (targetAngleX - state.angleX) * 0.075;
+        } else if (!state.isPointerDown) {
+          // Gentle ambient idle drift
+          const idleY = state.isHovered ? 0.0004 : (compact ? 0.0026 : 0.0016);
+          const idleX = state.isHovered ? 0.0001 : (compact ? 0.0009 : 0.0006);
+
+          state.velY += (state.targetVelY - state.velY) * 0.06;
+          state.velX += (state.targetVelX - state.velX) * 0.06;
+
+          state.angleY += state.velY + idleY;
+          state.angleX += state.velX + idleX;
+
+          state.targetVelY *= 0.92;
+          state.targetVelX *= 0.92;
+        }
+
+        const cosX = Math.cos(state.angleX);
+        const sinX = Math.sin(state.angleX);
+        const cosY = Math.cos(state.angleY);
+        const sinY = Math.sin(state.angleY);
+
+        // Transform 3D nodes
+        const projected = sphereNodes.current.map((node) => {
+          // Rotate around X axis
+          const y1 = node.y * cosX - node.z * sinX;
+          const z1 = node.y * sinX + node.z * cosX;
+
+          // Rotate around Y axis
+          const x2 = node.x * cosY + z1 * sinY;
+          const z2 = -node.x * sinY + z1 * cosY;
+
+          const px = x2 * radius;
+          const py = y1 * radius;
+          const pz = z2 * radius;
+
+          const scale = focalLength / (focalLength + pz);
+          const screenX = cx + px * scale;
+          const screenY = cy + py * scale;
+          const normZ = (pz + radius) / (2 * radius); // 0 (back) to 1 (front)
+          const opacity = Math.max(0.24, Math.min(1.0, 0.24 + 0.76 * normZ));
+          const zIndex = Math.round(normZ * 100);
+
+          return { screenX, screenY, scale, opacity, zIndex, pz, normZ };
         });
 
-        // Phase 1: Swoop through center line from initial crest/trough into opposite wave peak
-        tl.fromTo(
-          badge,
-          {
-            y: initialY,
-            rotationZ: initialRot,
-            scale: 0.78,
-            opacity: 0.35,
-            force3D: true
-          },
-          {
-            y: midY,
-            rotationZ: midRot,
-            scale: 0.92,
-            opacity: 0.85,
-            ease: 'sine.inOut',
-            duration: waveDuration * 0.50,
-            force3D: true
-          },
-          startT
-        );
+        // 1. Draw Canvas: Holographic ball ambient core, wireframe rings, and constellation links
+        if (canvas) {
+          if (canvas.width !== width || canvas.height !== height) {
+            canvas.width = width;
+            canvas.height = height;
+          }
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.clearRect(0, 0, width, height);
 
-        // Phase 2: Dampen wave oscillation and lock cleanly onto straight laser axis (y=0, rot=0, scale=1, opacity=1)
-        tl.to(
-          badge,
-          {
-            y: 0,
-            rotationZ: 0,
-            scale: 1.0,
-            opacity: 1.0,
-            ease: 'sine.out',
-            duration: waveDuration * 0.50,
-            force3D: true
-          },
-          midT
-        );
-      });
-    }, stage);
+            // Ambient central glowing sphere aura
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 1.05);
+            grad.addColorStop(0, 'rgba(59, 130, 246, 0.14)');
+            grad.addColorStop(0.55, 'rgba(96, 165, 250, 0.04)');
+            grad.addColorStop(0.85, 'rgba(255, 255, 255, 0.015)');
+            grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 1.05, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Wireframe 3D Latitude Rings (Equator + 2 Parallels)
+            const latitudes = [-0.55, 0, 0.55];
+            latitudes.forEach((latY) => {
+              const rLat = Math.sqrt(Math.max(0, 1 - latY * latY));
+              const steps = 48;
+              ctx.beginPath();
+              let first = true;
+
+              for (let s = 0; s <= steps; s++) {
+                const theta = (s / steps) * Math.PI * 2;
+                const lx = Math.cos(theta) * rLat;
+                const ly = latY;
+                const lz = Math.sin(theta) * rLat;
+
+                const ly1 = ly * cosX - lz * sinX;
+                const lz1 = ly * sinX + lz * cosX;
+                const lx2 = lx * cosY + lz1 * sinY;
+                const lz2 = -lx * sinY + lz1 * cosY;
+
+                const lScale = focalLength / (focalLength + lz2 * radius);
+                const lsx = cx + lx2 * radius * lScale;
+                const lsy = cy + ly1 * radius * lScale;
+
+                if (first) {
+                  ctx.moveTo(lsx, lsy);
+                  first = false;
+                } else {
+                  ctx.lineTo(lsx, lsy);
+                }
+              }
+              ctx.strokeStyle = latY === 0 ? 'rgba(96, 165, 250, 0.22)' : 'rgba(96, 165, 250, 0.10)';
+              ctx.lineWidth = latY === 0 ? 1.5 : 1;
+              ctx.stroke();
+            });
+
+            // Longitudinal Great Circle
+            ctx.beginPath();
+            const lonSteps = 48;
+            for (let s = 0; s <= lonSteps; s++) {
+              const theta = (s / lonSteps) * Math.PI * 2;
+              const lx = 0;
+              const ly = Math.sin(theta);
+              const lz = Math.cos(theta);
+
+              const ly1 = ly * cosX - lz * sinX;
+              const lz1 = ly * sinX + lz * cosX;
+              const lx2 = lx * cosY + lz1 * sinY;
+              const lz2 = -lx * sinY + lz1 * cosY;
+
+              const lScale = focalLength / (focalLength + lz2 * radius);
+              const lsx = cx + lx2 * radius * lScale;
+              const lsy = cy + ly1 * radius * lScale;
+
+              if (s === 0) ctx.moveTo(lsx, lsy);
+              else ctx.lineTo(lsx, lsy);
+            }
+            ctx.strokeStyle = 'rgba(96, 165, 250, 0.12)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Front constellation links between nearby front badges
+            ctx.lineWidth = 0.8;
+            for (let i = 0; i < projected.length; i++) {
+              if (projected[i].pz < -radius * 0.1) continue;
+              for (let j = i + 1; j < projected.length; j++) {
+                if (projected[j].pz < -radius * 0.1) continue;
+                const ddx = projected[i].screenX - projected[j].screenX;
+                const ddy = projected[i].screenY - projected[j].screenY;
+                const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+                if (dist < radius * 0.65) {
+                  const linkAlpha = (1 - dist / (radius * 0.65)) * 0.18;
+                  ctx.strokeStyle = `rgba(96, 165, 250, ${linkAlpha})`;
+                  ctx.beginPath();
+                  ctx.moveTo(projected[i].screenX, projected[i].screenY);
+                  ctx.lineTo(projected[j].screenX, projected[j].screenY);
+                  ctx.stroke();
+                }
+              }
+            }
+          }
+        }
+
+        // 2. Direct DOM Badge Updates for 120 FPS performance
+        projected.forEach((p, idx) => {
+          const el = badgeRefs.current[idx];
+          if (!el) return;
+
+          el.style.transform = `translate3d(${p.screenX}px, ${p.screenY}px, 0px) translate(-50%, -50%) scale(${p.scale.toFixed(3)})`;
+          el.style.opacity = p.opacity.toFixed(3);
+          el.style.zIndex = `${p.zIndex}`;
+
+          // Subtle depth blur for skills orbiting on the back side of the ball
+          if (p.pz < -radius * 0.25) {
+            const blurAmt = ((1 - p.normZ) * 2.0).toFixed(1);
+            el.style.filter = `blur(${blurAmt}px) brightness(0.72)`;
+          } else {
+            el.style.filter = 'none';
+          }
+        });
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    animationFrameId = requestAnimationFrame(render);
 
     return () => {
-      ctx.revert();
+      window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [compact]);
 
-  // Dealrapp.de-style mouse drag to explore
-  const handleMouseDown = (e: React.MouseEvent) => {
-    dragStartRef.current = {
-      isDown: true,
-      startX: e.clientX
-    };
-    setIsGrabbing(true);
+  // Pointer Drag handling to spin the sphere in any direction
+  const handlePointerDown = (e: React.PointerEvent) => {
+    rotState.current.isPointerDown = true;
+    rotState.current.pointerStartX = e.clientX;
+    rotState.current.pointerStartY = e.clientY;
+    rotState.current.lastPointerX = e.clientX;
+    rotState.current.lastPointerY = e.clientY;
+    setIsDragging(true);
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragStartRef.current.isDown) return;
-    const deltaX = e.clientX - dragStartRef.current.startX;
-    dragStartRef.current.startX = e.clientX;
-    // Dragging horizontally smoothly adjusts page scroll to advance/reverse skills along wave
-    window.scrollBy({ top: -deltaX * 3.2, behavior: 'instant' });
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!rotState.current.isPointerDown) return;
+    const dx = e.clientX - rotState.current.lastPointerX;
+    const dy = e.clientY - rotState.current.lastPointerY;
+    rotState.current.lastPointerX = e.clientX;
+    rotState.current.lastPointerY = e.clientY;
+
+    rotState.current.userDragOffsetY += dx * 0.005;
+    rotState.current.userDragOffsetX -= dy * 0.005;
+    rotState.current.angleY += dx * 0.005;
+    rotState.current.angleX -= dy * 0.005;
   };
 
-  const handleMouseUpOrLeave = () => {
-    dragStartRef.current.isDown = false;
-    setIsGrabbing(false);
+  const handlePointerUp = (e: React.PointerEvent) => {
+    rotState.current.isPointerDown = false;
+    setIsDragging(false);
+    try {
+      (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+    } catch {
+      // Ignored if not captured
+    }
   };
 
-  return (
-    <div ref={stageRef} className="skills-scroll-stage">
-      <div className="skills-sticky-viewport">
-        <section
-          ref={bandRef}
-          className={`skills-convergence-band ${isGrabbing ? 'is-grabbing' : ''}`}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUpOrLeave}
-          onMouseLeave={handleMouseUpOrLeave}
-          aria-label="Core Technical Skills Showcase (Scroll slowly to watch each skill arrive on the wave)"
+  // Hero Section Compact Mode: Just the interactive 3D ball, no text
+  if (compact) {
+    return (
+      <div className="hero-skills-ball-container">
+        <div className="hero-skills-ambient-glow" aria-hidden="true" />
+        <div
+          ref={containerRef}
+          className={`skills-sphere-stage is-compact ${isDragging ? 'is-dragging' : ''}`}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
         >
-          {/* Edge Vignette Fades for seamless entrance & exit (Dealrapp style) */}
-          <div className="skills-band-fade skills-band-fade-left" aria-hidden="true" />
-          <div className="skills-band-fade skills-band-fade-right" aria-hidden="true" />
+          <canvas ref={canvasRef} className="skills-sphere-canvas" />
 
-          {/* High-tech laser convergence baseline & ambient glow */}
-          <div className="skills-convergence-ambient" aria-hidden="true" />
-          <div className="skills-convergence-axis" aria-hidden="true">
-            <div className="skills-axis-pip" />
+          {items.map((skill, idx) => (
+            <div
+              key={skill.name}
+              ref={(el) => {
+                badgeRefs.current[idx] = el;
+              }}
+              className={`sphere-badge is-compact ${activeSkill?.name === skill.name ? 'is-active' : ''}`}
+              style={{ '--badge-accent': skill.color } as React.CSSProperties}
+              onMouseEnter={() => {
+                rotState.current.isHovered = true;
+                setActiveSkill(skill);
+              }}
+              onMouseLeave={() => {
+                rotState.current.isHovered = false;
+                setActiveSkill(null);
+              }}
+              title={skill.name}
+              aria-label={skill.name}
+            >
+              <div className="sphere-badge-glow" aria-hidden="true" />
+              <div className="sphere-badge-sheen" aria-hidden="true" />
+              <div className="sphere-badge-icon" aria-hidden="true">
+                {skill.icon}
+              </div>
+              <span className="sphere-badge-label mono">{skill.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Full Standalone Section Mode (e.g. for dedicated skills explore)
+  return (
+    <div ref={stageRef} className="skills-sphere-scroll-stage">
+      <div className="skills-sphere-sticky-viewport">
+        <section className="skills-sphere-section" aria-label="3D Interactive Skills Sphere">
+          {/* Editorial Header */}
+          <div className="skills-sphere-header wrap">
+            <div className="section-label">Interactive Tech Matrix</div>
+            <h2 className="skills-sphere-title">
+              Technical <em>Skills Sphere.</em>
+            </h2>
+            <p className="skills-sphere-desc">
+              Scroll slowly down to rotate the ball and view every skill one by one, or drag with your cursor to explore the stack in 3D.
+            </p>
+
           </div>
 
-          {/* Moving track containing all 25 skill logos */}
-          <div ref={trackRef} className="skills-convergence-track">
+          {/* 3D Sphere Interactive Stage */}
+          <div
+            ref={containerRef}
+            className={`skills-sphere-stage ${isDragging ? 'is-dragging' : ''}`}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+          >
+            {/* Holographic Wireframe Canvas */}
+            <canvas ref={canvasRef} className="skills-sphere-canvas" />
+
+            {/* 3D Projected Skill Badges */}
             {items.map((skill, idx) => (
               <div
-                key={`${skill.name}-${idx}`}
-                className="convergence-badge"
+                key={skill.name}
+                ref={(el) => {
+                  badgeRefs.current[idx] = el;
+                }}
+                className={`sphere-badge ${activeSkill?.name === skill.name ? 'is-active' : ''}`}
+                style={{ '--badge-accent': skill.color } as React.CSSProperties}
+                onMouseEnter={() => {
+                  rotState.current.isHovered = true;
+                  setActiveSkill(skill);
+                }}
+                onMouseLeave={() => {
+                  rotState.current.isHovered = false;
+                  setActiveSkill(null);
+                }}
                 title={skill.name}
                 aria-label={skill.name}
-                style={{ '--badge-accent': skill.color } as React.CSSProperties}
               >
-                {/* Ambient brand color aura */}
-                <div className="badge-glow" aria-hidden="true" />
-                {/* Top-left specular glass sheen */}
-                <div className="badge-sheen" aria-hidden="true" />
+                {/* Ambient Brand Halo */}
+                <div className="sphere-badge-glow" aria-hidden="true" />
+                {/* Specular Sheen */}
+                <div className="sphere-badge-sheen" aria-hidden="true" />
 
-                <div className="badge-icon-box" aria-hidden="true">
+                <div className="sphere-badge-icon" aria-hidden="true">
                   {skill.icon}
                 </div>
+
+                {/* Micro Name Label */}
+                <span className="sphere-badge-label mono">{skill.name}</span>
               </div>
             ))}
           </div>
@@ -451,4 +699,8 @@ export const SkillsConvergence: React.FC = () => {
     </div>
   );
 };
+
+export { SkillsConvergence as SkillsSphere };
+export default SkillsConvergence;
+
 

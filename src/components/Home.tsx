@@ -66,11 +66,11 @@ export const Home: React.FC = () => {
   }, []);
 
   return (
-    <div className="wrap home-content content-width pt-12 pb-4 sm:pt-16 sm:pb-6 md:pt-20">
+    <div className="wrap home-content content-width">
       {/* 2-Column Hero Section */}
       <section
         ref={heroRef}
-        className="hero-section hero-is-revealed mb-14 sm:mb-20 md:mb-24"
+        className="hero-section hero-is-revealed"
         aria-labelledby="hero-title"
       >
         {/* Modern Ethereal Ambient Illumination Mesh */}

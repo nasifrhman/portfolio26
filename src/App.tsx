@@ -81,7 +81,7 @@ export const App: React.FC = () => {
       <main id="main-content" className="route-page" key={activeRoute}>
         <ActiveComponent />
       </main>
-      <Footer isHome={activeRoute === 'home'} />
+      <Footer activeRoute={activeRoute} isHome={activeRoute === 'home'} />
     </>
   );
 };

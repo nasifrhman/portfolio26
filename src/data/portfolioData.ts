@@ -14,7 +14,7 @@ import {
 export const NAME = 'Md. Nasifur Rahman';
 export const DISPLAY_NAME = 'Md. Nasifur Rahman';
 export const EMAIL = 'mdnasifurahman@gmail.com';
-export const PHONE = '+8801863960668';
+export const PHONE = '+8801978552909';
 export const WHATSAPP = 'https://wa.me/1798552909';
 export const LOCATION = 'Dhaka, Bangladesh';
 export const AVATAR_URL = '/avatar.png';
@@ -293,7 +293,21 @@ export const PROJECT_FEATURES: ProjectFeature[] = [
 export const PUBLICATIONS_DATA: Publication[] = [
   {
     title: 'Accelerating model averaging with cluster-based approach using class occurrences',
-    authors: ['Md. Nasifur Rahman', 'Ruksat Khan Shayoni', 'M. F. Mridha', 'Jungpil Shin'],
+    authors: [
+      'Md. Nasifur Rahman',
+      'A. S. E. Elahi',
+      'S. Khanam',
+      'R. I. Rabbi',
+      'A. Bhowmik',
+      'D. Karmaker'
+    ],
+    authorUrls: {
+      'A. S. E. Elahi': 'https://link.springer.com/article/10.1007/s00521-025-11289-0#auth-A__S__E_-Elahi-Aff1',
+      'S. Khanam': 'https://link.springer.com/article/10.1007/s00521-025-11289-0#auth-S_-Khanam-Aff1',
+      'R. I. Rabbi': 'https://link.springer.com/article/10.1007/s00521-025-11289-0#auth-R__I_-Rabbi-Aff1',
+      'A. Bhowmik': 'https://link.springer.com/article/10.1007/s00521-025-11289-0#auth-A_-Bhowmik-Aff1',
+      'D. Karmaker': 'https://link.springer.com/article/10.1007/s00521-025-11289-0#auth-D_-Karmaker-Aff1'
+    },
     venue: 'Springer Neural Computing and Applications',
     year: '2025',
     status: 'published',

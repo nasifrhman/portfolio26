@@ -3,6 +3,7 @@ export type PublicationStatus = 'published' | 'accepted' | 'review' | 'preparati
 export interface Publication {
   title: string;
   authors: string[];
+  authorUrls?: Record<string, string>;
   venue: string;
   year?: string;
   status: PublicationStatus;

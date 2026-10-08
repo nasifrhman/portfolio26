@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, ArrowUpRight } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { RouteKey } from '../types/portfolio';
 import { EMAIL, DISPLAY_NAME, SOCIAL_LINKS } from '../data/portfolioData';
 import { GlassWords } from './GlassWords';
 
@@ -45,16 +46,46 @@ const SCATTER_PRESETS = [
 ];
 
 interface FooterProps {
+  activeRoute?: RouteKey;
   isHome?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ isHome = false }) => {
+export const Footer: React.FC<FooterProps> = ({ activeRoute, isHome = false }) => {
   const [copied, setCopied] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
+  // Independent intersection observers:
+  // - actionsRef triggers when buttons enter viewport
+  // - bottomRef triggers when social links & bottom bar enter viewport
   useEffect(() => {
-    if (!isHome) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+          } else {
+            entry.target.classList.remove('is-revealed');
+          }
+        });
+      },
+      {
+        threshold: 0.05,
+        rootMargin: '0px 0px -15px 0px'
+      }
+    );
 
+    if (actionsRef.current) observer.observe(actionsRef.current);
+    if (bottomRef.current) observer.observe(bottomRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [activeRoute, isHome]);
+
+  // GSAP scroll-driven kinetic typography assembly for "Let's Build something Great."
+  useEffect(() => {
     const footerEl = footerRef.current;
     if (!footerEl) return;
 
@@ -65,6 +96,10 @@ export const Footer: React.FC<FooterProps> = ({ isHome = false }) => {
     const letters = footerEl.querySelectorAll<HTMLElement>('.scatter-letter');
     if (!letters.length) return;
 
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 120);
+
     const ctx = gsap.context(() => {
       // Dynamic responsiveness: scale scatter distance according to screen width
       const getFactor = () => Math.min(1, Math.max(0.35, window.innerWidth / 1150));
@@ -72,15 +107,14 @@ export const Footer: React.FC<FooterProps> = ({ isHome = false }) => {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: footerEl,
-          start: 'top 88%',
-          end: 'top 28%',
-          scrub: 1.2,
+          start: 'top 92%',
+          end: 'top 24%',
+          scrub: 1.8,
           invalidateOnRefresh: true
         }
       });
 
-      // All letters animate together at the same time:
-      // By passing position 0 to all fromTo tweens, all 25 letters travel simultaneously
+      // All letters animate together simultaneously:
       letters.forEach((el, index) => {
         const cfg = SCATTER_PRESETS[index % SCATTER_PRESETS.length];
 
@@ -100,19 +134,20 @@ export const Footer: React.FC<FooterProps> = ({ isHome = false }) => {
             rotation: 0,
             scale: 1,
             opacity: 1,
-            ease: 'power2.out', // Smooth, fluid deceleration into final position
+            ease: 'power2.out',
             duration: 1,
             force3D: true
           },
-          0 // Insert at position 0: ALL 25 letters animate simultaneously!
+          0
         );
       });
     }, footerEl);
 
     return () => {
+      clearTimeout(timer);
       ctx.revert();
     };
-  }, [isHome]);
+  }, [activeRoute, isHome]);
 
   const handleCopyEmail = async () => {
     try {
@@ -125,31 +160,14 @@ export const Footer: React.FC<FooterProps> = ({ isHome = false }) => {
     }
   };
 
-  // Subpages render a clean, minimal footer without the Skills ribbon or "Let's Build" CTA
-  if (!isHome) {
-    return (
-      <footer className="site-footer" aria-label="Site Footer">
-        <div className="wrap footer-inner">
-          <div>
-            <p className="footer-thesis">
-              Engineered for <em>production.</em>
-            </p>
-            <a href={`mailto:${EMAIL}`} className="text-link mono">
-              {EMAIL}
-            </a>
-          </div>
-          <div className="footer-meta mono">
-            <span>© 2026 {DISPLAY_NAME}</span>
-            <span>DHAKA, BANGLADESH · UTC+6</span>
-          </div>
-        </div>
-      </footer>
-    );
-  }
+  // Filter out Springer Paper specifically for the footer section (LinkedIn, GitHub, WhatsApp)
+  const footerSocialLinks = SOCIAL_LINKS.filter(
+    ([label]) => !label.toLowerCase().includes('springer')
+  );
 
   return (
     <>
-      {/* Main Architectural Footer */}
+      {/* Architectural Footer (Present across all pages) */}
       <footer ref={footerRef} className="architectural-footer" aria-labelledby="footer-cta-title">
         <div className="wrap footer-cta-content">
           <GlassWords as="h2" id="footer-cta-title" className="footer-headline" scatter>
@@ -158,17 +176,17 @@ export const Footer: React.FC<FooterProps> = ({ isHome = false }) => {
             Great.
           </GlassWords>
 
-          <div className="footer-actions">
+          <div ref={actionsRef} className="footer-actions">
             <a
               href={`mailto:${EMAIL}`}
-              className="footer-btn footer-btn-primary"
+              className="footer-btn footer-btn-primary footer-anim-left"
             >
               <span>Send Email Directly</span>
             </a>
             <button
               type="button"
               onClick={handleCopyEmail}
-              className="footer-btn footer-btn-secondary"
+              className="footer-btn footer-btn-secondary footer-anim-right"
               aria-label="Copy email address"
             >
               {copied ? <Check size={18} /> : <Copy size={18} />}
@@ -176,24 +194,26 @@ export const Footer: React.FC<FooterProps> = ({ isHome = false }) => {
             </button>
           </div>
 
-          <div className="footer-social-row">
-            {SOCIAL_LINKS.map(([label, href]) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footer-social-link group"
-              >
-                <span>{label}</span>
-                <ArrowUpRight size={14} className="social-arrow" />
-              </a>
-            ))}
-          </div>
+          <div ref={bottomRef} className="footer-bottom-section">
+            <div className="footer-social-row footer-anim-fade">
+              {footerSocialLinks.map(([label, href]) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-social-link group"
+                >
+                  <span>{label}</span>
+                  <ArrowUpRight size={14} className="social-arrow" />
+                </a>
+              ))}
+            </div>
 
-          <div className="footer-bottom-bar mono">
-            <GlassWords as="span">© 2026 {DISPLAY_NAME.toUpperCase()} • DESIGNED &amp; BUILT WITH PRECISION</GlassWords>
-            <GlassWords as="span" className="footer-location-tag">DHAKA, BANGLADESH · UTC+6</GlassWords>
+            <div className="footer-bottom-bar mono footer-anim-fade">
+              <GlassWords as="span">© 2026 {DISPLAY_NAME.toUpperCase()} • ALL RIGHTS RESERVED</GlassWords>
+              <GlassWords as="span" className="footer-location-tag">DHAKA, BANGLADESH · UTC+6</GlassWords>
+            </div>
           </div>
         </div>
       </footer>

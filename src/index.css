@@ -3203,6 +3203,16 @@ body {
   }
 }
 
+.subpage-architectural-footer {
+  padding-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .subpage-architectural-footer {
+    padding-top: 12px;
+  }
+}
+
 .footer-cta-content {
   display: flex;
   flex-direction: column;
@@ -3371,6 +3381,111 @@ body {
   .footer-bottom-bar {
     justify-content: center;
     text-align: center;
+  }
+}
+
+/* ==========================================================================
+   ARCHITECTURAL FOOTER SCROLL ENTRANCE CHOREOGRAPHY
+   - "Send Email Directly" slides in from the left
+   - "Copy Email" slides in from the right at the exact same time
+   - Social links (LinkedIn, GitHub, WhatsApp) and bottom bar text
+     fade in smoothly together in the same style and at the same time
+   - Resets when scrolling back up
+   ========================================================================== */
+.footer-bottom-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.architectural-footer .footer-anim-left,
+.architectural-footer .footer-anim-right {
+  opacity: 0;
+  filter: blur(8px);
+  will-change: transform, opacity, filter;
+  transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 1.3s cubic-bezier(0.22, 1, 0.36, 1),
+              background 0.22s ease,
+              color 0.22s ease,
+              box-shadow 0.22s ease;
+}
+
+.architectural-footer .footer-anim-left {
+  transform: translateX(-90px);
+}
+
+.architectural-footer .footer-anim-right {
+  transform: translateX(90px);
+}
+
+.footer-actions.is-revealed .footer-anim-left,
+.footer-actions.is-revealed .footer-anim-right,
+.architectural-footer.footer-is-revealed .footer-anim-left,
+.architectural-footer.footer-is-revealed .footer-anim-right {
+  opacity: 1;
+  transform: translateX(0);
+  filter: blur(0px);
+  transition-delay: 0.08s;
+}
+
+/* Hover tactile elevation preserved when revealed */
+.footer-actions.is-revealed .footer-btn-primary:hover,
+.architectural-footer.footer-is-revealed .footer-btn-primary:hover {
+  transform: translate(3px, 3px);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.2s ease,
+              color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.footer-actions.is-revealed .footer-btn-secondary:hover,
+.architectural-footer.footer-is-revealed .footer-btn-secondary:hover {
+  transform: translate(3px, 3px);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.2s ease,
+              color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+/* Social row & bottom bar: Synchronized smooth fade-in from invisible state */
+/* Triggers specifically when user scrolls into the bottom section, ensuring it is never missed even if user pauses in 'Let's Build' */
+.architectural-footer .footer-anim-fade {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(22px);
+  will-change: opacity, filter, transform;
+  transition: opacity 1.35s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 1.35s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 1.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.footer-bottom-section.is-revealed .footer-anim-fade,
+.architectural-footer.footer-is-revealed .footer-anim-fade {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0);
+  transition-delay: 0.12s;
+}
+
+@media (max-width: 640px) {
+  .architectural-footer .footer-anim-left {
+    transform: translateX(-42px);
+  }
+  .architectural-footer .footer-anim-right {
+    transform: translateX(42px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .architectural-footer .footer-anim-left,
+  .architectural-footer .footer-anim-right,
+  .architectural-footer .footer-anim-fade {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
   }
 }
 
@@ -4432,6 +4547,17 @@ body {
   font-weight: 800;
 }
 
+.paper-authors .author-link {
+  color: var(--mid);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.paper-authors .author-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
 .paper-details {
   background: var(--paper-2);
   border: 1.5px solid var(--ink);
@@ -5299,6 +5425,10 @@ body {
   max-width: 100%;
   padding-inline: var(--gutter);
   margin-inline: auto;
+}
+
+.home-content {
+  padding-top: clamp(32px, 3.8vw, 50px);
 }
 
 .hero-section {

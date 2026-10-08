@@ -38,16 +38,30 @@ const PublicationRow: React.FC<PublicationRowProps> = ({ publication, selected =
         </h3>
 
         <p className="paper-authors">
-          {publication.authors.map((author, index) => (
-            <span key={`${publication.title}-${author}`}>
-              {author === 'Md. Nasifur Rahman' || author === 'Nasif Rahman' ? (
-                <strong>{author}</strong>
-              ) : (
-                author
-              )}
-              {index < publication.authors.length - 1 ? ', ' : ''}
-            </span>
-          ))}
+          {publication.authors.map((author, index) => {
+            const authorUrl = publication.authorUrls?.[author];
+            const isSelf = author === 'Md. Nasifur Rahman' || author === 'Nasif Rahman';
+            return (
+              <span key={`${publication.title}-${author}`}>
+                {authorUrl ? (
+                  <a
+                    href={authorUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="author-link"
+                    title={`View ${author} on Springer`}
+                  >
+                    {isSelf ? <strong>{author}</strong> : author}
+                  </a>
+                ) : isSelf ? (
+                  <strong>{author}</strong>
+                ) : (
+                  author
+                )}
+                {index < publication.authors.length - 1 ? ', ' : ''}
+              </span>
+            );
+          })}
         </p>
 
         <dl className="paper-details">

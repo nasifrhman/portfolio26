@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { RouteKey } from '../types/portfolio';
 import { EMAIL, DISPLAY_NAME, SOCIAL_LINKS } from '../data/portfolioData';
 import { GlassWords } from './GlassWords';
+import { usePortfolio } from '../context/PortfolioContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -51,10 +52,15 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ activeRoute, isHome = false }) => {
+  const { profile } = usePortfolio();
   const [copied, setCopied] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const targetEmail = profile.email || EMAIL;
+  const displayName = profile.displayName || DISPLAY_NAME;
+  const socialLinks = profile.socialLinks || SOCIAL_LINKS;
 
   // Independent intersection observers:
   // - actionsRef triggers when buttons enter viewport
@@ -151,7 +157,7 @@ export const Footer: React.FC<FooterProps> = ({ activeRoute, isHome = false }) =
 
   const handleCopyEmail = async () => {
     try {
-      await navigator.clipboard.writeText(EMAIL);
+      await navigator.clipboard.writeText(targetEmail);
       setCopied(true);
       setTimeout(() => setCopied(false), 2400);
     } catch {
@@ -161,7 +167,7 @@ export const Footer: React.FC<FooterProps> = ({ activeRoute, isHome = false }) =
   };
 
   // Filter out Springer Paper specifically for the footer section (LinkedIn, GitHub, WhatsApp)
-  const footerSocialLinks = SOCIAL_LINKS.filter(
+  const footerSocialLinks = socialLinks.filter(
     ([label]) => !label.toLowerCase().includes('springer')
   );
 
@@ -178,7 +184,7 @@ export const Footer: React.FC<FooterProps> = ({ activeRoute, isHome = false }) =
 
           <div ref={actionsRef} className="footer-actions">
             <a
-              href={`mailto:${EMAIL}`}
+              href={`mailto:${targetEmail}`}
               className="footer-btn footer-btn-primary footer-anim-left"
             >
               <span>Send Email Directly</span>
@@ -211,7 +217,7 @@ export const Footer: React.FC<FooterProps> = ({ activeRoute, isHome = false }) =
             </div>
 
             <div className="footer-bottom-bar mono footer-anim-fade">
-              <GlassWords as="span">© 2026 {DISPLAY_NAME.toUpperCase()} • ALL RIGHTS RESERVED</GlassWords>
+              <GlassWords as="span">© 2026 {displayName.toUpperCase()} • ALL RIGHTS RESERVED</GlassWords>
               <GlassWords as="span" className="footer-location-tag">DHAKA, BANGLADESH · UTC+6</GlassWords>
             </div>
           </div>

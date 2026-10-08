@@ -78,4 +78,6 @@ export type RouteKey =
   | 'industry'
   | 'projects'
   | 'education'
-  | 'contacts';
+  | 'contacts'
+  | 'admin';
+

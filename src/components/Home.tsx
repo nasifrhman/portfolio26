@@ -3,16 +3,11 @@ import { MilestonesTimeline } from './MilestonesTimeline';
 import { GlassWords } from './GlassWords';
 import { ActivitySection } from './ActivitySection';
 import { SkillsSphere } from './SkillsConvergence';
-import {
-  AVATAR_URL,
-  EDUCATION_DATA,
-  EXPLORE_CARDS,
-  NEWS_DATA,
-  EMAIL,
-  NAME
-} from '../data/portfolioData';
+import { EXPLORE_CARDS } from '../data/portfolioData';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const Home: React.FC = () => {
+  const { profile, education, news } = usePortfolio();
   const heroRef = useRef<HTMLElement>(null);
   const educationRef = useRef<HTMLElement>(null);
   const exploreRef = useRef<HTMLElement>(null);
@@ -82,13 +77,13 @@ export const Home: React.FC = () => {
             <div className="hero-avatar-wrap hero-anim-avatar">
               <div className="hero-avatar-halo" aria-hidden="true" />
               <img
-                alt={NAME}
+                alt={profile.name}
                 loading="lazy"
                 width={128}
                 height={128}
                 decoding="async"
                 className="h-32 w-32 rounded-full object-cover border-2 border-[var(--rule)] ring-4 ring-[var(--accent-wash)] shadow-2xl transition-transform hover:scale-105 duration-300 relative z-10"
-                src={AVATAR_URL}
+                src={profile.avatarUrl}
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src =
                     'https://avatars.githubusercontent.com/u/113826897?v=4';
@@ -100,11 +95,11 @@ export const Home: React.FC = () => {
               id="hero-title"
               className="mt-7 text-4xl font-semibold tracking-tight sm:text-5xl hero-anim-name"
             >
-              {NAME}
+              {profile.name}
             </h1>
 
             <p className="mt-5 text-xl leading-8 text-muted hero-anim-role">
-              Software Engineer
+              {profile.heroTagline || 'Software Engineer'}
             </p>
 
             <div className="article-text mt-8 max-w-3xl hero-bio-text">
@@ -200,9 +195,9 @@ export const Home: React.FC = () => {
               </a>
 
               <a
-                href={`mailto:${EMAIL}`}
+                href={`mailto:${profile.email}`}
                 className="inline-flex items-center gap-2 hover:text-ink transition-colors"
-                aria-label={`Email ${NAME}`}
+                aria-label={`Email ${profile.name}`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -220,7 +215,7 @@ export const Home: React.FC = () => {
                   <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>
                   <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                 </svg>
-                <span className="sr-only">Email {NAME}</span>
+                <span className="sr-only">Email {profile.name}</span>
               </a>
 
               <a
@@ -264,7 +259,7 @@ export const Home: React.FC = () => {
             <GlassWords as="h2" id="home-education-title">Academic foundation.</GlassWords>
           </div>
           <div className="hero-education-list">
-            {EDUCATION_DATA.map((item) => (
+            {education.map((item) => (
               <article key={item.title} className="scroll-slide-left-item">
                 <p className="mono">{item.period}</p>
                 <GlassWords as="h3">{item.title}</GlassWords>
@@ -315,7 +310,7 @@ export const Home: React.FC = () => {
             </div>
           </div>
 
-          <MilestonesTimeline items={NEWS_DATA} />
+          <MilestonesTimeline items={news} />
         </section>
 
         {/* Mobile View: Show Skill Ball after Career & Research Milestones section with title */}

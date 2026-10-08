@@ -63,7 +63,8 @@ export const ROUTE_TITLES: Record<RouteKey, string> = {
   industry: 'Experience | Md. Nasifur Rahman',
   projects: 'Projects | Md. Nasifur Rahman',
   education: 'Education | Md. Nasifur Rahman',
-  contacts: 'Contact | Md. Nasifur Rahman'
+  contacts: 'Contact | Md. Nasifur Rahman',
+  admin: 'Admin Dashboard | Md. Nasifur Rahman'
 };
 
 export const EXPLORE_CARDS: [string, string, string][] = [

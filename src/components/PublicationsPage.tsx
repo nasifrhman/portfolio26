@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { PageHeader } from './PageHeader';
 import { Publication, PublicationStatus } from '../types/portfolio';
-import { PUBLICATIONS_DATA, STATUS_MAP } from '../data/portfolioData';
+import { STATUS_MAP } from '../data/portfolioData';
+import { usePortfolio } from '../context/PortfolioContext';
 
 const STATUS_FILTERS: [PublicationStatus | 'all', string][] = [
   ['all', 'All'],
@@ -95,18 +96,19 @@ const PublicationRow: React.FC<PublicationRowProps> = ({ publication, selected =
 };
 
 export const PublicationsPage: React.FC = () => {
+  const { publications } = usePortfolio();
   const [activeFilter, setActiveFilter] = useState<PublicationStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredPublications = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return PUBLICATIONS_DATA.filter((pub) => {
+    return publications.filter((pub) => {
       const matchesFilter = activeFilter === 'all' || pub.status === activeFilter;
       const haystack = [pub.title, pub.venue, pub.theme, pub.authors.join(' ')].join(' ').toLowerCase();
       const matchesSearch = !query || haystack.includes(query);
       return matchesFilter && matchesSearch;
     });
-  }, [activeFilter, searchQuery]);
+  }, [publications, activeFilter, searchQuery]);
 
   return (
     <>

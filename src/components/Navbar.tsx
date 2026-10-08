@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RouteKey } from '../types/portfolio';
 import { REAL_NAV_LINKS, DISPLAY_NAME } from '../data/portfolioData';
+import { usePortfolio } from '../context/PortfolioContext';
 import { Sun, Moon } from 'lucide-react';
 
 interface NavbarProps {
@@ -10,7 +11,9 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ activeRoute, theme = 'dark', onToggleTheme }) => {
+  const { profile } = usePortfolio();
   const [isOpen, setIsOpen] = useState(false);
+  const brandName = profile.displayName || DISPLAY_NAME;
 
   useEffect(() => {
     setIsOpen(false);
@@ -19,8 +22,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeRoute, theme = 'dark', onT
   return (
     <header className="site-nav">
       <div className="wrap nav-inner">
-        <a className="brand" href="#home" aria-label={`${DISPLAY_NAME}, home`}>
-          <span>{DISPLAY_NAME}</span>
+        <a className="brand" href="#home" aria-label={`${brandName}, home`}>
+          <span>{brandName}</span>
         </a>
 
         <nav className="desktop-nav" aria-label="Primary navigation">

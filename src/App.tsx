@@ -15,6 +15,9 @@ import { EducationPage } from './components/EducationPage';
 import { ContactsPage } from './components/ContactsPage';
 import { MagnifyingCursor } from './components/MagnifyingCursor';
 
+import { AdminDashboard } from './components/AdminDashboard';
+import { PortfolioProvider } from './context/PortfolioContext';
+
 const ROUTE_COMPONENTS: Record<RouteKey, React.ComponentType> = {
   home: Home,
   skills: SkillsPage,
@@ -26,11 +29,21 @@ const ROUTE_COMPONENTS: Record<RouteKey, React.ComponentType> = {
   industry: IndustryPage,
   projects: ProjectsPage,
   education: EducationPage,
-  contacts: ContactsPage
+  contacts: ContactsPage,
+  admin: AdminDashboard
 };
 
-function getRouteFromHash(): RouteKey {
+function getRoute(): RouteKey {
+  if (typeof window === 'undefined') return 'home';
+
+  // Check direct URL path e.g. domain.com/admin or /admin/
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+  if (path === 'admin') return 'admin';
+
+  // Check hash route e.g. domain.com/#admin
   const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+  if (hash === 'admin') return 'admin';
+
   return (ROUTE_COMPONENTS[hash as RouteKey] ? hash : 'home') as RouteKey;
 }
 
@@ -43,16 +56,20 @@ function getInitialTheme(): 'dark' | 'light' {
 }
 
 export const App: React.FC = () => {
-  const [activeRoute, setActiveRoute] = useState<RouteKey>(getRouteFromHash);
+  const [activeRoute, setActiveRoute] = useState<RouteKey>(getRoute);
   const [theme, setTheme] = useState<'dark' | 'light'>(getInitialTheme);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      setActiveRoute(getRouteFromHash());
+    const handleRouteChange = () => {
+      setActiveRoute(getRoute());
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', handleRouteChange);
+    window.addEventListener('popstate', handleRouteChange);
+    return () => {
+      window.removeEventListener('hashchange', handleRouteChange);
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -69,21 +86,29 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [activeRoute]);
 
+  const isAdmin = activeRoute === 'admin';
   const ActiveComponent = ROUTE_COMPONENTS[activeRoute] || Home;
 
   return (
-    <>
+    <PortfolioProvider>
       <MagnifyingCursor />
-      <a className="skip-link" href="#main-content">
-        Skip to content
-      </a>
-      <Navbar activeRoute={activeRoute} theme={theme} onToggleTheme={toggleTheme} />
-      <main id="main-content" className="route-page" key={activeRoute}>
-        <ActiveComponent />
-      </main>
-      <Footer activeRoute={activeRoute} isHome={activeRoute === 'home'} />
-    </>
+      {isAdmin ? (
+        <AdminDashboard />
+      ) : (
+        <>
+          <a className="skip-link" href="#main-content">
+            Skip to content
+          </a>
+          <Navbar activeRoute={activeRoute} theme={theme} onToggleTheme={toggleTheme} />
+          <main id="main-content" className="route-page" key={activeRoute}>
+            <ActiveComponent />
+          </main>
+          <Footer activeRoute={activeRoute} isHome={activeRoute === 'home'} />
+        </>
+      )}
+    </PortfolioProvider>
   );
 };
 
 export default App;
+

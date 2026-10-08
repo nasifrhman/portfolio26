@@ -1,9 +1,16 @@
 import React from 'react';
 import { PageHeader } from './PageHeader';
 import { ContactRibbon } from './ContactRibbon';
-import { PHONE, WHATSAPP, LOCATION, GMAIL_COMPOSE_URL } from '../data/portfolioData';
+import { PHONE, WHATSAPP, LOCATION } from '../data/portfolioData';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const ContactsPage: React.FC = () => {
+  const { profile } = usePortfolio();
+  const phone = profile.phone || PHONE;
+  const whatsapp = profile.whatsapp || WHATSAPP;
+  const location = profile.location || LOCATION;
+  const composeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${profile.email || 'mdnasifurahman@gmail.com'}`;
+
   return (
     <>
       <PageHeader
@@ -38,21 +45,21 @@ export const ContactsPage: React.FC = () => {
           <div className="contact-direct-card">
             <span className="mono contact-card-label">Direct Phone</span>
             <p className="contact-card-val">
-              <a href={`tel:${PHONE}`}>{PHONE}</a>
+              <a href={`tel:${phone}`}>{phone}</a>
             </p>
           </div>
 
           <div className="contact-direct-card">
             <span className="mono contact-card-label">WhatsApp</span>
             <p className="contact-card-val">
-              <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">01798552909 ↗</a>
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer">{phone} ↗</a>
             </p>
           </div>
 
           <div className="contact-direct-card">
             <span className="mono contact-card-label">Location</span>
             <p className="contact-card-val">
-              {LOCATION}
+              {location}
             </p>
           </div>
         </div>
@@ -73,7 +80,7 @@ export const ContactsPage: React.FC = () => {
         <div className="contact-action-row">
           <a
             className="footer-btn footer-btn-primary"
-            href={GMAIL_COMPOSE_URL}
+            href={composeUrl}
             target="_blank"
             rel="noopener noreferrer"
           >

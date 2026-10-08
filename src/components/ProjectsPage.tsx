@@ -1,8 +1,10 @@
 import React from 'react';
 import { PageHeader } from './PageHeader';
-import { PROJECTS_DATA, PROJECT_FEATURES } from '../data/portfolioData';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const ProjectsPage: React.FC = () => {
+  const { projects, projectFeatures } = usePortfolio();
+
   return (
     <>
       <PageHeader
@@ -19,8 +21,8 @@ export const ProjectsPage: React.FC = () => {
       </PageHeader>
 
       <section className="project-showcase wrap" aria-label="Selected software projects">
-        {PROJECTS_DATA.map((project, index) => {
-          const feature = PROJECT_FEATURES[index] || {
+        {projects.map((project, index) => {
+          const feature = projectFeatures[index] || {
             type: 'Software Application',
             subtitle: 'Digital Solution',
             impact: 'Active Production'

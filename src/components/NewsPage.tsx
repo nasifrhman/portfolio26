@@ -1,9 +1,11 @@
 import React from 'react';
 import { PageHeader } from './PageHeader';
 import { MilestonesTimeline } from './MilestonesTimeline';
-import { NEWS_DATA } from '../data/portfolioData';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const NewsPage: React.FC = () => {
+  const { news } = usePortfolio();
+
   return (
     <>
       <PageHeader
@@ -20,7 +22,7 @@ export const NewsPage: React.FC = () => {
       </PageHeader>
 
       <section className="wrap news-page" aria-label="Milestones Timeline Archive">
-        <MilestonesTimeline items={NEWS_DATA} />
+        <MilestonesTimeline items={news} />
       </section>
     </>
   );

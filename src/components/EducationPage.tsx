@@ -1,9 +1,11 @@
 import React from 'react';
 import { PageHeader } from './PageHeader';
 import { TimelineList } from './TimelineList';
-import { EDUCATION_DATA, HONORS_DATA } from '../data/portfolioData';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const EducationPage: React.FC = () => {
+  const { education, honors } = usePortfolio();
+
   return (
     <>
       <PageHeader
@@ -20,7 +22,7 @@ export const EducationPage: React.FC = () => {
       </PageHeader>
 
       <section className="wrap" aria-label="Academic Degrees Timeline">
-        <TimelineList items={EDUCATION_DATA} />
+        <TimelineList items={education} />
       </section>
 
       <section className="editorial-section wrap" aria-labelledby="honors-title">
@@ -31,7 +33,7 @@ export const EducationPage: React.FC = () => {
           </div>
         </div>
         <div className="honor-list">
-          {HONORS_DATA.map((honor) => (
+          {honors.map((honor) => (
             <article key={`${honor.title}-${honor.year}`}>
               <div>
                 <h3>{honor.title}</h3>

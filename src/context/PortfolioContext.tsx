@@ -90,7 +90,7 @@ const DEFAULT_PORTFOLIO_STATE: PortfolioDataState = {
   peerReviews: PEER_REVIEWS
 };
 
-const STORAGE_KEY = 'portfolio_custom_data_v1';
+const STORAGE_KEY = 'portfolio_custom_data_v2';
 
 export interface PortfolioContextType extends PortfolioDataState {
   updateProfile: (profile: Partial<ProfileData>) => void;

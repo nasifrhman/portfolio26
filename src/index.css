@@ -1189,21 +1189,7 @@ to {
   margin-top:9px
 }
 
-.research-area-grid {
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  display:grid
-}
 
-.research-area-grid article {
-  border-bottom:1px solid var(--rule);
-  min-height:215px;
-  padding:27px 28px 28px 0
-}
-
-.research-area-grid article:not(:nth-child(3n+1)) {
-  border-left:1px solid var(--rule);
-  padding-left:28px
-}
 
 .research-area-grid article>span {
   color:var(--accent);
@@ -1582,7 +1568,7 @@ to {
   display:flex
 }
 
-@media (width<=900px) {
+@media (max-width: 1040px) {
   :root {
   --gutter:26px
 }
@@ -1604,7 +1590,9 @@ to {
   grid-template-rows:0fr;
   transition:grid-template-rows .22s,border-width .22s;
   display:grid;
-  overflow:hidden
+  overflow:hidden;
+  max-height: calc(100vh - 65px);
+  overflow-y: auto;
 }
 
 .mobile-nav.open {
@@ -1724,19 +1712,6 @@ to {
   max-width:20ch
 }
 
-.research-area-grid {
-  grid-template-columns:repeat(2,minmax(0,1fr))
-}
-
-.research-area-grid article:nth-child(3n+1) {
-  border-left:1px solid var(--rule);
-  padding-left:28px
-}
-
-.research-area-grid article:nth-child(odd) {
-  border-left:0;
-  padding-left:0
-}
 
 .split-section {
   grid-template-columns:1fr;
@@ -1916,8 +1891,7 @@ body {
 
 .paper-row {
   grid-template-columns:1fr;
-  gap:12px;
-  padding:22px 0 24px
+  gap:16px;
 }
 
 .paper-year-block {
@@ -2036,8 +2010,7 @@ body {
 
 .timeline-item {
   grid-template-columns:1fr;
-  gap:7px;
-  padding:23px 0
+  gap:16px;
 }
 
 .timeline-item h3 {
@@ -2046,12 +2019,6 @@ body {
 
 .research-area-grid {
   grid-template-columns:1fr
-}
-
-.research-area-grid article,.research-area-grid article:nth-child(3n+1),.research-area-grid article:nth-child(odd) {
-  border-left:0;
-  min-height:auto;
-  padding:23px 0 25px
 }
 
 .research-area-grid h3 {
@@ -2078,8 +2045,7 @@ body {
 
 .project-feature {
   grid-template-columns:1fr;
-  gap:14px;
-  padding:36px 0 40px
+  gap:20px;
 }
 
 .project-number {
@@ -4741,19 +4707,20 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   RESPONSIVE DESIGN SYSTEM OVERRIDES (<= 900px & <= 640px)
+   RESPONSIVE DESIGN SYSTEM OVERRIDES (TABLET <= 1024px & MOBILE <= 680px / 400px)
    -------------------------------------------------------------------------- */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .project-feature {
     grid-template-columns: 1fr;
     gap: 24px;
+    padding: 28px 26px;
   }
 
   .project-aside {
     border-left: 0;
     border-top: 2px solid var(--ink);
     padding-left: 0;
-    padding-top: 24px;
+    padding-top: 22px;
   }
 
   .contact-ribbon {
@@ -4763,6 +4730,11 @@ body {
   .contact-email-block {
     border-right: 0;
     border-bottom: 2px solid var(--ink);
+  }
+
+  .contact-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
   }
 
   .hero-education,
@@ -4798,10 +4770,17 @@ body {
   .timeline-item {
     grid-template-columns: 1fr;
     gap: 16px;
+    padding: 26px 26px;
   }
 
   .paper-row {
     grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 26px 26px;
+  }
+
+  .research-area-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
   }
 
@@ -4812,17 +4791,189 @@ body {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 680px) {
+  :root {
+    --gutter: 18px;
+  }
+
+  .section-heading {
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+
+  .section-heading h1,
+  .section-heading h2 {
+    font-size: clamp(24px, 6.2vw, 32px);
+    line-height: 1.2;
+  }
+
+  .page-header {
+    padding-top: 52px;
+    padding-bottom: 34px;
+    margin-bottom: 34px;
+  }
+
+  .page-header h1 {
+    font-size: clamp(28px, 7.5vw, 42px);
+    line-height: 1.1;
+  }
+
+  .project-feature {
+    padding: 22px 18px;
+    box-shadow: 5px 5px 0px 0px var(--shadow-color);
+  }
+
+  .project-number {
+    width: 58px;
+    font-size: 16px;
+    padding: 6px 0;
+  }
+
+  .project-main h2 {
+    font-size: clamp(22px, 5.8vw, 30px);
+    line-height: 1.15;
+  }
+
+  .project-subtitle {
+    font-size: 15px;
+    margin-top: 6px;
+  }
+
+  .project-description {
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin-top: 14px;
+  }
+
+  .project-links {
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  .project-links a {
+    padding: 7px 13px;
+    font-size: 11px;
+  }
+
+  .project-stack-tags {
+    gap: 6px;
+  }
+
+  .stack-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .paper-row {
+    padding: 22px 18px;
+    box-shadow: 4px 4px 0px 0px var(--shadow-color);
+  }
+
+  .paper-details {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .timeline-item {
+    padding: 22px 18px;
+    box-shadow: 4px 4px 0px 0px var(--shadow-color);
+  }
+
+  .timeline-period {
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+
+  .timeline-item h3 {
+    font-size: clamp(18px, 5vw, 21px);
+  }
+
+  .research-area-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .research-area-grid article {
+    padding: 22px 18px;
+    box-shadow: 4px 4px 0px 0px var(--shadow-color);
+  }
+
+  .research-area-grid h3 {
+    font-size: clamp(18px, 5vw, 20px);
+  }
+
+  .contact-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .contact-direct-card {
+    padding: 20px 18px;
+    box-shadow: 4px 4px 0px 0px var(--shadow-color);
+  }
+
+  .contact-card-val {
+    font-size: 18px;
+    word-break: break-word;
+  }
+
+  .contact-invitation h2 {
+    font-size: clamp(22px, 5.8vw, 28px);
+  }
+
   .contact-profile-links {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 
-  .contact-profile-links a:nth-child(2n+1) {
+  .contact-profile-links a {
     border-left: 0;
+    border-top: 1.5px solid var(--ink);
+    padding: 13px 16px;
   }
 
-  .contact-profile-links a:nth-child(n+3) {
-    border-top: 1.5px solid var(--ink);
+  .contact-profile-links a:first-child {
+    border-top: 0;
+  }
+
+  .contact-email-val {
+    font-size: clamp(15px, 4.5vw, 20px);
+    word-break: break-all;
+  }
+
+  .milestone-entry {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .milestone-node {
+    width: 14px;
+    height: 14px;
+  }
+
+  .milestone-title {
+    font-size: clamp(17px, 4.8vw, 20px);
+  }
+}
+
+@media (max-width: 400px) {
+  :root {
+    --gutter: 14px;
+  }
+
+  .project-feature,
+  .timeline-item,
+  .paper-row,
+  .skill-card,
+  .research-area-grid article,
+  .contact-direct-card {
+    padding: 18px 14px;
+  }
+
+  .kicker {
+    font-size: 10px;
+    padding: 3px 8px;
   }
 }
 

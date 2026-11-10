@@ -3785,7 +3785,7 @@ body {
   font-weight: 900;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  line-height: 1.0;
+  line-height: 1.2;
   color: var(--ink);
   margin-top: 10px;
 }
@@ -4863,19 +4863,34 @@ body {
 }
 
 /* ==========================================================================
-/* ==========================================================================
    ARCHITECTURAL MILESTONES SCROLL-REVEAL TIMELINE (DELIBERATE ANIMATION)
    ========================================================================== */
 .milestones-section .section-heading {
-  padding-bottom: 12px;
-  margin-bottom: 14px;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+.milestones-section .section-heading h2,
+#milestones-timeline-title {
+  line-height: 1.25;
+}
+
+.milestones-section .section-heading h2 .hero-serif-contrast,
+#milestones-timeline-title .hero-serif-contrast {
+  display: inline-block;
+  margin-top: 6px;
+}
+
+.milestones-section .mag-letter,
+.section-heading .mag-letter {
+  transform-origin: center center;
 }
 
 .milestones-timeline {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin-top: 14px;
+  margin-top: 0;
   margin-bottom: 0;
   position: relative;
 }

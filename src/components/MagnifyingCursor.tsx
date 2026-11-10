@@ -196,11 +196,12 @@ export const MagnifyingCursor: React.FC = () => {
             // Cosine bell curve wave (1 at center, smoothly tapering to 0 at edge)
             const factor = Math.cos((distX / waveRadius) * (Math.PI / 2));
 
-            // Giant letters (e.g. 100px footer headline) vs standard letters (hero / milestones)
-            const isGiant = item.height > 45;
-            const maxScaleBoost = isGiant ? 0.42 : 0.65;
-            const maxLift = isGiant ? 14 : 6.5;
-            const maxParting = isGiant ? 12 : 4.8;
+            // Headings / multi-line titles vs giant footer letters vs standard letters
+            const isHeading = Boolean(item.el.closest('h1, h2, h3, .section-heading'));
+            const isGiant = item.height > 55;
+            const maxScaleBoost = isGiant ? 0.32 : (isHeading ? 0.28 : 0.65);
+            const maxLift = isGiant ? 6 : (isHeading ? 0 : 6.5);
+            const maxParting = isGiant ? 10 : (isHeading ? 3.5 : 4.8);
 
             const scale = 1 + maxScaleBoost * factor;
             const translateY = -maxLift * factor;

@@ -223,6 +223,15 @@ export const SKILLS_DATA: SkillCategory[] = [
 
 export const PROJECTS_DATA: Project[] = [
   {
+    title: 'Dealr – Restaurant & Entertainment Deals Platform',
+    description: 'A mobile application and discovery platform focused on food lovers and entertainment seekers, helping users discover nearby restaurants, exclusive offers, popular food spots, and fun activity centers. Enables restaurants and entertainment venues to collaborate on the platform, promote special deals, and attract customers.',
+    stack: 'Next.js · Node.js · Express.js · REST APIs · Mobile App · iOS & Android',
+    live: 'https://dealrapp.de/',
+    ios: 'https://apps.apple.com/us/app/dealr-app/id6761794996',
+    android: 'https://play.google.com/store/apps/details?id=de.dealrapp.app',
+    github: 'https://github.com/nasifrhman'
+  },
+  {
     title: 'Deenyah – Umrah Badal Platform',
     description: 'A full-stack web and cross-platform mobile ecosystem engineered for Umrah Badal services. Features transparent booking, verified performance tracking, real-time status updates, and digital certificates for international users.',
     stack: 'Node.js · Express.js · React.js · React Native · MongoDB · AWS · REST API · iOS & Android',
@@ -242,6 +251,11 @@ export const PROJECTS_DATA: Project[] = [
 ];
 
 export const PROJECT_FEATURES: ProjectFeature[] = [
+  {
+    type: 'Full Stack & Mobile',
+    subtitle: 'Discovery & deals platform for restaurants and entertainment',
+    impact: 'Live Web, iOS & Android apps'
+  },
   {
     type: 'Full Stack & Mobile',
     subtitle: 'Web & mobile platform for Umrah Badal services',

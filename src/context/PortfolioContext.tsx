@@ -120,18 +120,23 @@ const PortfolioContext = createContext<PortfolioContextType | null>(null);
 export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [data, setData] = useState<PortfolioDataState>(() => {
     if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          return {
-            ...DEFAULT_PORTFOLIO_STATE,
-            ...parsed,
-            profile: { ...DEFAULT_PORTFOLIO_STATE.profile, ...(parsed.profile || {}) }
-          };
+      const isAdmin =
+        window.location.hash.toLowerCase().includes('admin') ||
+        window.location.pathname.toLowerCase().includes('admin');
+      if (isAdmin) {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            return {
+              ...DEFAULT_PORTFOLIO_STATE,
+              ...parsed,
+              profile: { ...DEFAULT_PORTFOLIO_STATE.profile, ...(parsed.profile || {}) }
+            };
+          }
+        } catch (e) {
+          console.error('Failed to parse saved portfolio data:', e);
         }
-      } catch (e) {
-        console.error('Failed to parse saved portfolio data:', e);
       }
     }
     return DEFAULT_PORTFOLIO_STATE;

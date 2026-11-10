@@ -232,11 +232,33 @@ export const PROJECTS_DATA: Project[] = [
     github: 'https://github.com/nasifrhman'
   },
   {
+    title: 'HavnProp.io – Real Estate Platform',
+    description: 'An advanced real estate analytics and investment platform designed to help investors calculate returns, evaluate property values, simulate mortgages, and analyze financial metrics for smarter, data-driven decisions.',
+    stack: 'React.js · Node.js · Express.js · PostgreSQL · Mobile App · Cloudflare · REST API',
+    live: 'https://havnprop.io',
+    android: 'https://play.google.com/store/apps/details?id=com.benjamin.havnapp',
+    github: 'https://github.com/nasifrhman'
+  },
+  {
     title: 'Training Plus – Sports Training App',
     description: 'An all-in-one sports and fitness mobile training application with athlete progress logging, workout schedules, customized training programs, and performance analytics.',
     stack: 'Android · Node.js · Express.js · MongoDB · REST APIs · Google Play Store',
     live: '',
     android: 'https://play.google.com/store/apps/details?id=com.trainingplus.app',
+    github: 'https://github.com/nasifrhman'
+  },
+  {
+    title: 'Oriboshi – Astrophotography Platform',
+    description: 'A specialized platform for astrophotography enthusiasts and learners, featuring interactive online courses, high-resolution astronomical image galleries, and on-site observatory service bookings.',
+    stack: 'React.js · Node.js · Express.js · Tailwind CSS · Cloud Storage · REST API',
+    live: 'https://oriboshi.com',
+    github: 'https://github.com/nasifrhman'
+  },
+  {
+    title: 'Love of Sewing – Course Platform',
+    description: 'An international e-learning platform providing structured sewing video courses, student progress dashboards, payment gateway integration, and course management.',
+    stack: 'React.js · Node.js · Express.js · MySQL · Stripe · Netlify',
+    live: 'https://loveofsewing.de',
     github: 'https://github.com/nasifrhman'
   }
 ];

@@ -51,11 +51,6 @@ export const ProjectsPage: React.FC = () => {
                       Android App ↗
                     </a>
                   ) : null}
-                  {project.github ? (
-                    <a href={project.github} target="_blank" rel="noopener noreferrer">
-                      GitHub ↗
-                    </a>
-                  ) : null}
                 </div>
               </div>
 

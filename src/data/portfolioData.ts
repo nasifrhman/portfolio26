@@ -228,8 +228,7 @@ export const PROJECTS_DATA: Project[] = [
     stack: 'Next.js · Node.js · Express.js · REST APIs · Mobile App · iOS & Android',
     live: 'https://dealrapp.de/',
     ios: 'https://apps.apple.com/us/app/dealr-app/id6761794996',
-    android: 'https://play.google.com/store/apps/details?id=de.dealrapp.app',
-    github: 'https://github.com/nasifrhman'
+    android: 'https://play.google.com/store/apps/details?id=de.dealrapp.app'
   },
   {
     title: 'Deenyah – Umrah Badal Platform',
@@ -237,16 +236,14 @@ export const PROJECTS_DATA: Project[] = [
     stack: 'Node.js · Express.js · React.js · React Native · MongoDB · AWS · REST API · iOS & Android',
     live: 'https://deenyah.com',
     ios: 'https://apps.apple.com/us/app/deenyah/id6756536239',
-    android: 'https://play.google.com/store/apps/details?id=com.deenyah.customer&hl=en_US',
-    github: 'https://github.com/nasifrhman'
+    android: 'https://play.google.com/store/apps/details?id=com.deenyah.customer&hl=en_US'
   },
   {
     title: 'Training Plus – Sports Training App',
     description: 'An all-in-one sports and fitness mobile training application with athlete progress logging, workout schedules, customized training programs, and performance analytics.',
     stack: 'Android · Node.js · Express.js · MongoDB · REST APIs · Google Play Store',
     live: '',
-    android: 'https://play.google.com/store/apps/details?id=com.trainingplus.app',
-    github: 'https://github.com/nasifrhman'
+    android: 'https://play.google.com/store/apps/details?id=com.trainingplus.app'
   }
 ];
 

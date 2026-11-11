@@ -36,8 +36,10 @@ export const ScrollToTop: React.FC = () => {
       onClick={scrollToTop}
       aria-label="Scroll back to top"
       title="Scroll to top"
+      style={{ cursor: 'pointer' }}
     >
-      <ArrowUp size={20} strokeWidth={2.5} className="scroll-top-icon" />
+      <ArrowUp size={20} strokeWidth={2.5} className="scroll-top-icon" style={{ cursor: 'pointer' }} />
     </button>
   );
 };
+

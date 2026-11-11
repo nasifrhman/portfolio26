@@ -101,12 +101,15 @@ export const App: React.FC = () => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               entry.target.classList.add('is-revealed');
+            } else {
+              // Re-trigger on phone scroll so cards dynamically enter as the user explores up and down
+              entry.target.classList.remove('is-revealed');
             }
           });
         },
         {
-          threshold: 0.05,
-          rootMargin: '0px 0px -25px 0px'
+          threshold: 0.08,
+          rootMargin: '0px 0px -30px 0px'
         }
       );
 

@@ -2566,6 +2566,20 @@ body {
   .sphere-badge-label {
     display: none;
   }
+  .sphere-badge.is-active .sphere-badge-label {
+    display: block !important;
+    opacity: 1 !important;
+    bottom: -28px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    border-color: var(--badge-accent, #60a5fa) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+  }
+  .sphere-badge.is-active {
+    box-shadow: 0 0 28px 4px var(--badge-accent, #60a5fa), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+    border-color: var(--badge-accent, #60a5fa) !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -7158,11 +7172,11 @@ body {
 /* Universal Scroll-Reveal Items */
 .anim-scroll-item {
   opacity: 0;
-  transform: translateY(26px);
+  transform: translateY(32px);
   filter: blur(5px);
-  transition: opacity 0.72s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.72s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.72s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--item-delay, 0s);
   will-change: opacity, transform, filter;
 }
@@ -7173,17 +7187,50 @@ body {
   filter: blur(0);
 }
 
-/* Fallback: if browser doesn't execute observer or user starts at top */
-.route-page .wrap:first-of-type .anim-scroll-item:not(.is-revealed) {
-  animation: anim-item-fallback 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: var(--item-delay, 0.1s);
+/* Punchy, noticeable animation dynamics specifically for phone users */
+@media (max-width: 768px) {
+  .anim-scroll-item {
+    transform: translateY(38px) scale(0.965);
+    filter: blur(4px);
+    transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                filter 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .anim-scroll-item.is-revealed {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
 }
 
-@keyframes anim-item-fallback {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
+/* Tactile Tap & Touch Feedback for Phone Users */
+@media (hover: none) and (pointer: coarse), (max-width: 768px) {
+  .skill-card:active,
+  .project-feature:active,
+  .timeline-item:active,
+  .paper-row:active,
+  .honor-list article:active,
+  .research-area-grid article:active {
+    transform: scale(0.975) translateY(-2px) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px var(--accent), 0 8px 24px rgba(59, 130, 246, 0.35) !important;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease !important;
+  }
+
+  .skill-pill:active {
+    transform: scale(1.15) !important;
+    background: var(--accent) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.5) !important;
+    border-color: var(--accent) !important;
+  }
+
+  .project-links a:active,
+  .paper-link:active,
+  .footer-btn:active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease !important;
   }
 }
 

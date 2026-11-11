@@ -311,10 +311,13 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
       const deltaY = currentScrollY - rotState.current.lastScrollY;
       rotState.current.lastScrollY = currentScrollY;
 
-      // Smooth scroll rotation: scrolling the page spins the ball smoothly
-      if (Math.abs(deltaY) > 0.5) {
-        rotState.current.targetVelY += deltaY * 0.0016;
-        rotState.current.targetVelX += deltaY * 0.0007;
+      // Dynamic responsive scroll spin (extra energetic on mobile touch screens)
+      const isMobile = window.innerWidth <= 768;
+      const scrollFactor = isMobile ? 0.0034 : 0.0016;
+
+      if (Math.abs(deltaY) > 0.4) {
+        rotState.current.targetVelY += deltaY * scrollFactor;
+        rotState.current.targetVelX += deltaY * (scrollFactor * 0.42);
       }
     };
 
@@ -535,7 +538,7 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     };
   }, [compact]);
 
-  // Pointer Drag handling to spin the sphere in any direction
+  // Pointer Drag handling to spin the sphere in any direction with touch flick momentum
   const handlePointerDown = (e: React.PointerEvent) => {
     rotState.current.isPointerDown = true;
     rotState.current.pointerStartX = e.clientX;
@@ -543,12 +546,10 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     rotState.current.lastPointerX = e.clientX;
     rotState.current.lastPointerY = e.clientY;
     setIsDragging(true);
-    if (e.pointerType !== 'touch') {
-      try {
-        (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-      } catch {
-        // Ignored
-      }
+    try {
+      (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    } catch {
+      // Ignored
     }
   };
 
@@ -559,13 +560,28 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     rotState.current.lastPointerX = e.clientX;
     rotState.current.lastPointerY = e.clientY;
 
-    rotState.current.userDragOffsetY += dx * 0.005;
-    rotState.current.userDragOffsetX -= dy * 0.005;
-    rotState.current.angleY += dx * 0.005;
-    rotState.current.angleX -= dy * 0.005;
+    const isTouch = e.pointerType === 'touch';
+    // Highly responsive touch drag multiplier for phone screens
+    const dragSensitivity = isTouch ? 0.012 : 0.0065;
+
+    rotState.current.userDragOffsetY += dx * dragSensitivity;
+    rotState.current.userDragOffsetX -= dy * dragSensitivity;
+    rotState.current.angleY += dx * dragSensitivity;
+    rotState.current.angleX -= dy * dragSensitivity;
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    if (rotState.current.isPointerDown) {
+      // Transfer release drag momentum into continuous rotation velocity (flick to spin on phone)
+      const isTouch = e.pointerType === 'touch';
+      const releaseDx = e.clientX - rotState.current.pointerStartX;
+      const releaseDy = e.clientY - rotState.current.pointerStartY;
+      const momentumMult = isTouch ? 0.00085 : 0.00045;
+
+      rotState.current.targetVelY = releaseDx * momentumMult;
+      rotState.current.targetVelX = -releaseDy * momentumMult * 0.5;
+    }
+
     rotState.current.isPointerDown = false;
     setIsDragging(false);
     try {
@@ -598,6 +614,10 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
               }}
               className={`sphere-badge is-compact ${activeSkill?.name === skill.name ? 'is-active' : ''}`}
               style={{ '--badge-accent': skill.color } as React.CSSProperties}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveSkill((prev) => (prev?.name === skill.name ? null : skill));
+              }}
               onMouseEnter={() => {
                 rotState.current.isHovered = true;
                 setActiveSkill(skill);
@@ -629,15 +649,22 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
         <section className="skills-sphere-section" aria-label="3D Interactive Skills Sphere">
           {/* Editorial Header */}
           <div className="skills-sphere-header wrap anim-scroll-item">
-            <div className="sphere-status-pill mono anim-beacon-wrap">
-              <span className="sphere-beacon-dot"></span>
-              LIVE 3D INTERACTIVE MATRIX • DRAG OR SCROLL
+            <div className={`sphere-status-pill mono anim-beacon-wrap ${activeSkill ? 'has-active' : ''}`}>
+              <span
+                className="sphere-beacon-dot"
+                style={activeSkill ? { background: activeSkill.color, boxShadow: `0 0 10px ${activeSkill.color}` } : undefined}
+              />
+              {activeSkill ? (
+                <span>ACTIVE: <strong style={{ color: activeSkill.color }}>{activeSkill.name}</strong></span>
+              ) : (
+                <span>LIVE 3D INTERACTIVE MATRIX • TAP &amp; DRAG</span>
+              )}
             </div>
             <h2 className="skills-sphere-title">
               Technical <em>Skills Sphere.</em>
             </h2>
             <p className="skills-sphere-desc">
-              Scroll or drag with your cursor or finger to explore the core tech stack in 3D.
+              Tap any skill badge to inspect, or drag and scroll with your finger to rotate the stack in 3D.
             </p>
           </div>
 
@@ -662,6 +689,10 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
                 }}
                 className={`sphere-badge ${activeSkill?.name === skill.name ? 'is-active' : ''}`}
                 style={{ '--badge-accent': skill.color } as React.CSSProperties}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveSkill((prev) => (prev?.name === skill.name ? null : skill));
+                }}
                 onMouseEnter={() => {
                   rotState.current.isHovered = true;
                   setActiveSkill(skill);

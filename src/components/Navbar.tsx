@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { RouteKey } from '../types/portfolio';
 import { REAL_NAV_LINKS, DISPLAY_NAME } from '../data/portfolioData';
 import { usePortfolio } from '../context/PortfolioContext';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, MoreVertical, X } from 'lucide-react';
 
 interface NavbarProps {
   activeRoute: RouteKey;
@@ -26,6 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeRoute, theme = 'dark', onT
           <span>{brandName}</span>
         </a>
 
+        {/* Desktop Navigation Links */}
         <nav className="desktop-nav" aria-label="Primary navigation">
           {REAL_NAV_LINKS.map(([route, label]) => (
             <a
@@ -50,35 +51,20 @@ export const Navbar: React.FC<NavbarProps> = ({ activeRoute, theme = 'dark', onT
           ) : null}
         </nav>
 
-        {/* Mobile Header Controls: Day/Night Theme Toggle & Expand Menu Button */}
-        <div className="mobile-header-controls">
-          {onToggleTheme ? (
-            <button
-              className="mobile-theme-btn"
-              type="button"
-              onClick={onToggleTheme}
-              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-            </button>
-          ) : null}
-
-          <button
-            className={`menu-toggle${isOpen ? ' open' : ''}`}
-            type="button"
-            aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
-            aria-expanded={isOpen}
-            aria-controls="mobile-navigation"
-            onClick={() => setIsOpen((prev) => !prev)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-        </div>
+        {/* Mobile View: Only Morevert Menu Icon */}
+        <button
+          className={`menu-toggle${isOpen ? ' open' : ''}`}
+          type="button"
+          aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
+          aria-expanded={isOpen}
+          aria-controls="mobile-navigation"
+          onClick={() => setIsOpen((prev) => !prev)}
+        >
+          {isOpen ? <X size={20} /> : <MoreVertical size={20} />}
+        </button>
       </div>
 
+      {/* Expanded Mobile Navigation Drawer: Shows all links and the mood / theme option */}
       <nav
         className={`mobile-nav${isOpen ? ' open' : ''}`}
         id="mobile-navigation"
@@ -96,15 +82,19 @@ export const Navbar: React.FC<NavbarProps> = ({ activeRoute, theme = 'dark', onT
               {label}
             </a>
           ))}
+
           {onToggleTheme ? (
-            <button
-              className="mobile-theme-toggle"
-              type="button"
-              onClick={onToggleTheme}
-            >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-              <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-            </button>
+            <div className="mobile-nav-theme-row">
+              <button
+                className="mobile-theme-toggle"
+                type="button"
+                onClick={onToggleTheme}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+            </div>
           ) : null}
         </div>
       </nav>

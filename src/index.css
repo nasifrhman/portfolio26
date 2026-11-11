@@ -2164,21 +2164,40 @@ body {
   background: var(--accent-wash);
 }
 
+.mobile-nav-theme-row {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--rule);
+  display: flex;
+  align-items: center;
+}
+
 .mobile-theme-toggle {
   background: var(--paper-2);
-  border: 1px solid var(--rule);
-  border-radius: 6px;
-  padding: 8px 14px;
+  border: 1.5px solid var(--ink);
+  box-shadow: 2px 2px 0px 0px var(--shadow-color);
+  border-radius: 8px;
+  padding: 9px 16px;
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 11.5px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 10px;
   cursor: pointer;
+  transition: all .16s ease;
+}
+
+.mobile-theme-toggle:hover,
+.mobile-theme-toggle:active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px 0px var(--shadow-color);
 }
 
 /* ==========================================================================
@@ -3519,7 +3538,7 @@ body {
   .brand {
     font-size: 15px;
     letter-spacing: -0.02em;
-    max-width: calc(100% - 94px);
+    max-width: calc(100% - 50px);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3578,10 +3597,6 @@ body {
     width: 100%;
   }
 
-  .mobile-header-controls {
-    display: none !important;
-  }
-
   .menu-toggle {
     display: none !important;
   }
@@ -3596,70 +3611,36 @@ body {
     display: none !important;
   }
 
-  .mobile-header-controls {
-    display: flex !important;
-    align-items: center;
-    gap: 8px;
-    z-index: 110;
-  }
-
   .menu-toggle {
     display: flex !important;
   }
 }
 
 /* ==========================================================================
-   MOBILE HEADER CONTROLS (THEME TOGGLE & EXPAND BUTTON)
+   MOBILE EXPAND / MOREVERT MENU BUTTON
    ========================================================================== */
-.mobile-header-controls {
-  display: none;
-}
-
-.mobile-theme-btn {
+.menu-toggle {
   width: 38px;
   height: 38px;
-  border-radius: 9px;
+  border-radius: 8px;
   background: var(--paper-2);
   border: 1.5px solid var(--ink);
   color: var(--ink);
   box-shadow: 2px 2px 0px 0px var(--shadow-color);
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   padding: 0;
-  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  cursor: pointer;
   flex-shrink: 0;
+  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
+  z-index: 110;
 }
 
-.mobile-theme-btn:hover,
-.mobile-theme-btn:active {
+.menu-toggle:hover,
+.menu-toggle:active {
   background: var(--accent);
   color: #ffffff;
-  border-color: var(--accent);
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0px 0px var(--shadow-color);
-}
-
-.menu-toggle {
-  width: 38px;
-  height: 38px;
-  border-radius: 9px;
-  background: var(--paper-2);
-  border: 1.5px solid var(--ink);
-  box-shadow: 2px 2px 0px 0px var(--shadow-color);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-  padding: 0;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
-}
-
-.menu-toggle:hover {
   border-color: var(--accent);
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0px 0px var(--shadow-color);
@@ -3668,31 +3649,7 @@ body {
 .menu-toggle.open {
   background: var(--accent-wash);
   border-color: var(--accent);
-}
-
-.menu-toggle span {
-  display: block;
-  width: 18px;
-  height: 2px;
-  background: var(--ink);
-  border-radius: 2px;
-  margin: 0;
-  transition: transform 0.22s ease, opacity 0.18s ease, background-color 0.2s ease;
-}
-
-.menu-toggle.open span:first-child {
-  transform: translateY(6px) rotate(45deg);
-  background: var(--accent);
-}
-
-.menu-toggle.open span:nth-child(2) {
-  opacity: 0;
-  transform: scaleX(0);
-}
-
-.menu-toggle.open span:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
-  background: var(--accent);
+  color: var(--accent);
 }
 
 /* ==========================================================================

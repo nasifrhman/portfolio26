@@ -10,40 +10,40 @@ import { usePortfolio } from '../context/PortfolioContext';
 gsap.registerPlugin(ScrollTrigger);
 
 // 25 deterministic, multi-directional scatter presets
-// Bounded vertically so characters stay within footer area and never overlap upward into skills
+// Bounded vertically so characters stay closely aligned with the headline line and eliminate empty vertical void
 const SCATTER_PRESETS = [
   // "Let's" (5 chars: L, e, t, ', s)
-  { x: -380, y: -15,  rotate: -22, scale: 0.90, opacity: 0.70 }, // L: top-left high
-  { x: -240, y: 30,   rotate: 18,  scale: 1.05, opacity: 0.70 }, // e: top-left deep
-  { x: -90,  y: -10,  rotate: -14, scale: 0.92, opacity: 0.72 }, // t: top center-left
-  { x: 80,   y: 25,   rotate: 24,  scale: 1.08, opacity: 0.70 }, // ': top center-right
-  { x: 310,  y: -10,  rotate: -20, scale: 0.95, opacity: 0.72 }, // s: top-right diagonal
+  { x: -340, y: -14, rotate: -22, scale: 0.92, opacity: 0.70 },
+  { x: -220, y: 16,  rotate: 18,  scale: 1.04, opacity: 0.70 },
+  { x: -80,  y: -10, rotate: -14, scale: 0.94, opacity: 0.72 },
+  { x: 70,   y: 15,  rotate: 24,  scale: 1.06, opacity: 0.70 },
+  { x: 280,  y: -12, rotate: -20, scale: 0.95, opacity: 0.72 },
 
   // "Build" (5 chars: B, u, i, l, d)
-  { x: -460, y: 60,   rotate: 22,  scale: 1.06, opacity: 0.65 }, // B: far left
-  { x: -380, y: 140,  rotate: -16, scale: 0.92, opacity: 0.72 }, // u: bottom-left mid
-  { x: -220, y: 220,  rotate: 20,  scale: 1.04, opacity: 0.74 }, // i: bottom-left deep
-  { x: 360,  y: 40,   rotate: -22, scale: 0.88, opacity: 0.68 }, // l: top-right far
-  { x: 470,  y: 90,   rotate: 16,  scale: 1.04, opacity: 0.65 }, // d: far right mid
+  { x: -420, y: 14,  rotate: 22,  scale: 1.05, opacity: 0.65 },
+  { x: -320, y: -15, rotate: -16, scale: 0.92, opacity: 0.72 },
+  { x: -180, y: 16,  rotate: 20,  scale: 1.04, opacity: 0.74 },
+  { x: 320,  y: -16, rotate: -22, scale: 0.90, opacity: 0.68 },
+  { x: 420,  y: 15,  rotate: 16,  scale: 1.04, opacity: 0.65 },
 
   // "something" (9 chars: s, o, m, e, t, h, i, n, g)
-  { x: -420, y: 170,  rotate: -28, scale: 0.94, opacity: 0.68 }, // s: bottom-left far
-  { x: 200,  y: 15,   rotate: 15,  scale: 1.10, opacity: 0.72 }, // o: top right high
-  { x: -140, y: 260,  rotate: -18, scale: 0.90, opacity: 0.75 }, // m: bottom center-left
-  { x: 40,   y: 310,  rotate: 22,  scale: 1.02, opacity: 0.72 }, // e: bottom center deep
-  { x: 200,  y: 280,  rotate: -20, scale: 0.94, opacity: 0.74 }, // t: bottom center-right
-  { x: 360,  y: 210,  rotate: 16,  scale: 1.05, opacity: 0.70 }, // h: bottom-right far
-  { x: 330,  y: 130,  rotate: -12, scale: 0.96, opacity: 0.75 }, // i: right mid-down
-  { x: -320, y: 80,   rotate: 20,  scale: 1.06, opacity: 0.70 }, // n: left mid-down
-  { x: 430,  y: 110,  rotate: -24, scale: 0.92, opacity: 0.68 }, // g: far right diagonal
+  { x: -380, y: -16, rotate: -26, scale: 0.94, opacity: 0.68 },
+  { x: 180,  y: 14,  rotate: 15,  scale: 1.08, opacity: 0.72 },
+  { x: -120, y: -12, rotate: -18, scale: 0.92, opacity: 0.75 },
+  { x: 40,   y: 18,  rotate: 22,  scale: 1.02, opacity: 0.72 },
+  { x: 180,  y: -14, rotate: -20, scale: 0.94, opacity: 0.74 },
+  { x: 320,  y: 16,  rotate: 16,  scale: 1.04, opacity: 0.70 },
+  { x: 290,  y: -12, rotate: -12, scale: 0.96, opacity: 0.75 },
+  { x: -280, y: 15,  rotate: 20,  scale: 1.05, opacity: 0.70 },
+  { x: 380,  y: -15, rotate: -24, scale: 0.92, opacity: 0.68 },
 
   // "Great." (6 chars: G, r, e, a, t, .)
-  { x: -300, y: 240,  rotate: -20, scale: 1.08, opacity: 0.72 }, // G: bottom-left deep
-  { x: -60,  y: 320,  rotate: 14,  scale: 0.95, opacity: 0.74 }, // r: bottom direct
-  { x: 130,  y: 30,   rotate: -16, scale: 1.04, opacity: 0.72 }, // e: top direct
-  { x: 120,  y: 310,  rotate: 20,  scale: 0.92, opacity: 0.72 }, // a: bottom direct-right
-  { x: 330,  y: 260,  rotate: -24, scale: 1.05, opacity: 0.70 }, // t: bottom-right deep
-  { x: 460,  y: 200,  rotate: 26,  scale: 1.12, opacity: 0.65 }, // .: far right bottom
+  { x: -260, y: 16,  rotate: -20, scale: 1.06, opacity: 0.72 },
+  { x: -50,  y: -16, rotate: 14,  scale: 0.95, opacity: 0.74 },
+  { x: 120,  y: 14,  rotate: -16, scale: 1.04, opacity: 0.72 },
+  { x: 110,  y: -12, rotate: 20,  scale: 0.94, opacity: 0.72 },
+  { x: 290,  y: 15,  rotate: -24, scale: 1.04, opacity: 0.70 },
+  { x: 410,  y: -14, rotate: 26,  scale: 1.10, opacity: 0.65 },
 ];
 
 interface FooterProps {
@@ -108,14 +108,15 @@ export const Footer: React.FC<FooterProps> = ({ activeRoute, isHome = false }) =
 
     const ctx = gsap.context(() => {
       // Dynamic responsiveness: scale scatter distance according to screen width
-      const getFactor = () => Math.min(1, Math.max(0.35, window.innerWidth / 1150));
+      const getFactorX = () => Math.min(1, Math.max(0.25, window.innerWidth / 1150));
+      const getFactorY = () => (window.innerWidth <= 768 ? 0.35 : Math.min(0.85, window.innerWidth / 1150));
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: footerEl,
-          start: 'top 92%',
-          end: 'top 24%',
-          scrub: 1.8,
+          start: 'top 95%',
+          end: 'top 45%',
+          scrub: 1.2,
           invalidateOnRefresh: true
         }
       });
@@ -127,8 +128,8 @@ export const Footer: React.FC<FooterProps> = ({ activeRoute, isHome = false }) =
         tl.fromTo(
           el,
           {
-            x: () => cfg.x * getFactor(),
-            y: () => cfg.y * getFactor(),
+            x: () => cfg.x * getFactorX(),
+            y: () => cfg.y * getFactorY(),
             rotation: cfg.rotate,
             scale: cfg.scale,
             opacity: cfg.opacity,

@@ -25,16 +25,20 @@ export const EducationPage: React.FC = () => {
         <TimelineList items={education} />
       </section>
 
-      <section className="editorial-section wrap" aria-labelledby="honors-title">
-        <div className="section-heading compact">
+      <section className="editorial-section wrap anim-scroll-section" aria-labelledby="honors-title">
+        <div className="section-heading compact anim-scroll-item">
           <div>
             <p className="kicker">Honors &amp; Awards</p>
             <h2 id="honors-title">Recognition Along the Way</h2>
           </div>
         </div>
         <div className="honor-list">
-          {honors.map((honor) => (
-            <article key={`${honor.title}-${honor.year}`}>
+          {honors.map((honor, index) => (
+            <article
+              key={`${honor.title}-${honor.year}`}
+              className="anim-scroll-item"
+              style={{ '--item-delay': `${index * 0.08}s` } as React.CSSProperties}
+            >
               <div>
                 <h3>{honor.title}</h3>
                 {honor.detail ? <p>{honor.detail}</p> : null}

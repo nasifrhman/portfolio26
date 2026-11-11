@@ -22,8 +22,8 @@ export const ResearchPage: React.FC = () => {
         </p>
       </PageHeader>
 
-      <section className="editorial-section wrap" aria-labelledby="research-path-title">
-        <div className="section-heading compact">
+      <section className="editorial-section wrap anim-scroll-section" aria-labelledby="research-path-title">
+        <div className="section-heading compact anim-scroll-item">
           <div>
             <p className="kicker">Research Experience</p>
             <h2 id="research-path-title">Academic &amp; Lab Roles</h2>
@@ -35,8 +35,8 @@ export const ResearchPage: React.FC = () => {
         <TimelineList items={RESEARCH_EXPERIENCE} />
       </section>
 
-      <section className="editorial-section wrap" aria-labelledby="research-areas-title">
-        <div className="section-heading compact">
+      <section className="editorial-section wrap anim-scroll-section" aria-labelledby="research-areas-title">
+        <div className="section-heading compact anim-scroll-item">
           <div>
             <p className="kicker">Research Areas</p>
             <h2 id="research-areas-title">Research Interests</h2>
@@ -44,7 +44,11 @@ export const ResearchPage: React.FC = () => {
         </div>
         <div className="research-area-grid">
           {RESEARCH_AREAS.map((area, index) => (
-            <article key={area.title}>
+            <article
+              key={area.title}
+              className="anim-scroll-item"
+              style={{ '--item-delay': `${index * 0.08}s` } as React.CSSProperties}
+            >
               <span className="mono">0{index + 1}</span>
               <h3>{area.title}</h3>
               <p>{area.description}</p>

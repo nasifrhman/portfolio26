@@ -15,13 +15,17 @@ const STATUS_FILTERS: [PublicationStatus | 'all', string][] = [
 interface PublicationRowProps {
   publication: Publication;
   selected?: boolean;
+  index?: number;
 }
 
-const PublicationRow: React.FC<PublicationRowProps> = ({ publication, selected = false }) => {
+const PublicationRow: React.FC<PublicationRowProps> = ({ publication, selected = false, index = 0 }) => {
   const statusConfig = STATUS_MAP[publication.status];
 
   return (
-    <article className={`paper-row${selected ? ' selected' : ''}`}>
+    <article
+      className={`paper-row anim-scroll-item${selected ? ' selected' : ''}`}
+      style={{ '--item-delay': `${index * 0.08}s` } as React.CSSProperties}
+    >
       <div className="paper-year-block">
         <span className="paper-year serif">{publication.year || '—'}</span>
         <span className={`status ${statusConfig.className}`}>{statusConfig.label}</span>
@@ -177,8 +181,8 @@ export const PublicationsPage: React.FC = () => {
 
           <div className="paper-list">
             {filteredPublications.length ? (
-              filteredPublications.map((pub) => (
-                <PublicationRow key={pub.title} publication={pub} />
+              filteredPublications.map((pub, index) => (
+                <PublicationRow key={pub.title} publication={pub} index={index} />
               ))
             ) : (
               <p className="empty-state">No publications match this search.</p>

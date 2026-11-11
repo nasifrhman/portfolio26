@@ -19,8 +19,8 @@ export const SkillsPage: React.FC = () => {
         </p>
       </PageHeader>
 
-      <section className="editorial-section wrap" aria-labelledby="skills-ledger-title">
-        <div className="section-heading compact">
+      <section className="editorial-section wrap anim-scroll-section" aria-labelledby="skills-ledger-title">
+        <div className="section-heading compact anim-scroll-item">
           <div>
             <p className="kicker">Proficiencies &amp; Tooling</p>
             <h2 id="skills-ledger-title">What I carry into every build.</h2>
@@ -28,8 +28,12 @@ export const SkillsPage: React.FC = () => {
         </div>
 
         <div className="skills-ledger">
-          {SKILLS_DATA.map((skill) => (
-            <article key={skill.title} className="skill-card">
+          {SKILLS_DATA.map((skill, index) => (
+            <article
+              key={skill.title}
+              className="skill-card anim-scroll-item"
+              style={{ '--item-delay': `${index * 0.06}s` } as React.CSSProperties}
+            >
               <div className="skill-card-header">
                 <h3>{skill.title}</h3>
               </div>

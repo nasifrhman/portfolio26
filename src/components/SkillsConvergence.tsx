@@ -262,14 +262,14 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
   const [activeSkill, setActiveSkill] = useState<SkillItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // References for smooth 60-120fps physics loop with gentle, low-speed rotation
+  // References for smooth 60-120fps physics loop with scroll scrub
   const rotState = useRef({
     angleX: 0.16,
     angleY: -0.3,
     velX: 0,
     velY: 0,
-    targetVelX: 0.001,
-    targetVelY: 0.005,
+    targetVelX: 0.009,
+    targetVelY: 0.032,
     lastScrollY: 0,
     scrollProgress: 0,
     isStageActive: false,
@@ -311,15 +311,10 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
       const deltaY = currentScrollY - rotState.current.lastScrollY;
       rotState.current.lastScrollY = currentScrollY;
 
-      // Low-speed, short-duration scroll impulse: capped to prevent hyper-spin
+      // Smooth scroll rotation: scrolling the page spins the ball smoothly
       if (Math.abs(deltaY) > 0.5) {
-        const clampedDelta = Math.max(-50, Math.min(50, deltaY));
-        rotState.current.targetVelY += clampedDelta * 0.00032;
-        rotState.current.targetVelX += clampedDelta * 0.00012;
-
-        // Strict speed cap
-        rotState.current.targetVelY = Math.max(-0.016, Math.min(0.016, rotState.current.targetVelY));
-        rotState.current.targetVelX = Math.max(-0.008, Math.min(0.008, rotState.current.targetVelX));
+        rotState.current.targetVelY += deltaY * 0.0016;
+        rotState.current.targetVelX += deltaY * 0.0007;
       }
     };
 
@@ -354,19 +349,18 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
         const focalLength = compact ? 490 : 560;
 
         if (!state.isPointerDown) {
-          // Slow, serene ambient idle drift
-          const idleY = state.isHovered ? 0.0002 : (compact ? 0.0012 : 0.0008);
-          const idleX = state.isHovered ? 0.00005 : (compact ? 0.0004 : 0.0003);
+          // Gentle ambient idle drift + inertia from page scroll velocity
+          const idleY = state.isHovered ? 0.0004 : (compact ? 0.0026 : 0.0016);
+          const idleX = state.isHovered ? 0.0001 : (compact ? 0.0009 : 0.0006);
 
-          state.velY += (state.targetVelY - state.velY) * 0.12;
-          state.velX += (state.targetVelX - state.velX) * 0.12;
+          state.velY += (state.targetVelY - state.velY) * 0.06;
+          state.velX += (state.targetVelX - state.velX) * 0.06;
 
           state.angleY += state.velY + idleY;
           state.angleX += state.velX + idleX;
 
-          // Quick deceleration to stop spinning quickly (reduced spin time)
-          state.targetVelY *= 0.82;
-          state.targetVelX *= 0.82;
+          state.targetVelY *= 0.92;
+          state.targetVelX *= 0.92;
         }
 
         const cosX = Math.cos(state.angleX);
@@ -395,7 +389,7 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
           const opacity = Math.max(0.24, Math.min(1.0, 0.24 + 0.76 * normZ));
           const zIndex = Math.round(normZ * 100);
 
-          return { screenX, screenY, scale, opacity, zIndex, pz, normZ };
+          return { screenX, screenY, scale, opacity, zIndex, pz, normZ, skill: node.skill };
         });
 
         // 1. Draw Canvas: Holographic ball ambient core, wireframe rings, and constellation links
@@ -479,8 +473,7 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Front constellation links between nearby front badges
-            ctx.lineWidth = 0.8;
+            // Front constellation links between nearby front badges with active network lighting
             for (let i = 0; i < projected.length; i++) {
               if (projected[i].pz < -radius * 0.1) continue;
               for (let j = i + 1; j < projected.length; j++) {
@@ -489,8 +482,19 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
                 const ddy = projected[i].screenY - projected[j].screenY;
                 const dist = Math.sqrt(ddx * ddx + ddy * ddy);
                 if (dist < radius * 0.65) {
-                  const linkAlpha = (1 - dist / (radius * 0.65)) * 0.18;
-                  ctx.strokeStyle = `rgba(96, 165, 250, ${linkAlpha})`;
+                  const isConnectedToActive =
+                    activeSkill &&
+                    (projected[i].skill.name === activeSkill.name || projected[j].skill.name === activeSkill.name);
+
+                  if (isConnectedToActive) {
+                    ctx.strokeStyle = activeSkill.color;
+                    ctx.lineWidth = 1.6;
+                  } else {
+                    const linkAlpha = (1 - dist / (radius * 0.65)) * 0.22;
+                    ctx.strokeStyle = `rgba(96, 165, 250, ${linkAlpha})`;
+                    ctx.lineWidth = 0.8;
+                  }
+
                   ctx.beginPath();
                   ctx.moveTo(projected[i].screenX, projected[i].screenY);
                   ctx.lineTo(projected[j].screenX, projected[j].screenY);
@@ -555,11 +559,10 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     rotState.current.lastPointerX = e.clientX;
     rotState.current.lastPointerY = e.clientY;
 
-    // Controlled, smooth drag speed
-    rotState.current.userDragOffsetY += dx * 0.0035;
-    rotState.current.userDragOffsetX -= dy * 0.0035;
-    rotState.current.angleY += dx * 0.0035;
-    rotState.current.angleX -= dy * 0.0035;
+    rotState.current.userDragOffsetY += dx * 0.005;
+    rotState.current.userDragOffsetX -= dy * 0.005;
+    rotState.current.angleY += dx * 0.005;
+    rotState.current.angleX -= dy * 0.005;
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -621,25 +624,27 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
 
   // Full Standalone Section Mode (e.g. for dedicated skills explore)
   return (
-    <div ref={stageRef} className="skills-sphere-scroll-stage">
+    <div ref={stageRef} className="skills-sphere-scroll-stage anim-scroll-section">
       <div className="skills-sphere-sticky-viewport">
         <section className="skills-sphere-section" aria-label="3D Interactive Skills Sphere">
           {/* Editorial Header */}
-          <div className="skills-sphere-header wrap">
-            <div className="section-label">Interactive Tech Matrix</div>
+          <div className="skills-sphere-header wrap anim-scroll-item">
+            <div className="sphere-status-pill mono anim-beacon-wrap">
+              <span className="sphere-beacon-dot"></span>
+              LIVE 3D INTERACTIVE MATRIX • DRAG OR SCROLL
+            </div>
             <h2 className="skills-sphere-title">
               Technical <em>Skills Sphere.</em>
             </h2>
             <p className="skills-sphere-desc">
               Scroll or drag with your cursor or finger to explore the core tech stack in 3D.
             </p>
-
           </div>
 
           {/* 3D Sphere Interactive Stage */}
           <div
             ref={containerRef}
-            className={`skills-sphere-stage ${isDragging ? 'is-dragging' : ''}`}
+            className={`skills-sphere-stage anim-scroll-item ${isDragging ? 'is-dragging' : ''}`}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}

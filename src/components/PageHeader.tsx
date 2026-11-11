@@ -15,10 +15,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   className = ''
 }) => {
   return (
-    <header className={`page-header wrap ${className}`.trim()}>
-      <GlassWords as="p" className="kicker">{kicker}</GlassWords>
-      <GlassWords as="h1">{title}</GlassWords>
-      {children ? <div className="page-lede"><GlassWords>{children}</GlassWords></div> : null}
+    <header className={`page-header wrap anim-page-header ${className}`.trim()}>
+      <GlassWords as="p" className="kicker anim-header-kicker">{kicker}</GlassWords>
+      <GlassWords as="h1" className="anim-header-title">{title}</GlassWords>
+      {children ? <div className="page-lede anim-header-lede"><GlassWords>{children}</GlassWords></div> : null}
     </header>
   );
 };

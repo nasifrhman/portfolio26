@@ -9,8 +9,12 @@ interface TimelineListProps {
 export const TimelineList: React.FC<TimelineListProps> = ({ items }) => {
   return (
     <div className="timeline-list">
-      {items.map((item) => (
-        <article key={`${item.title}-${item.period}`} className="timeline-item">
+      {items.map((item, index) => (
+        <article
+          key={`${item.title}-${item.period}`}
+          className="timeline-item anim-scroll-item"
+          style={{ '--item-delay': `${index * 0.08}s` } as React.CSSProperties}
+        >
           <div className="timeline-period mono">{item.period}</div>
           <div>
             <GlassWords as="h3">{item.title}</GlassWords>

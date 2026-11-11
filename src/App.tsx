@@ -86,6 +86,40 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [activeRoute]);
 
+  // Global scroll reveal observer for animated items across subpages
+  useEffect(() => {
+    const main = document.getElementById('main-content');
+    if (!main) return;
+
+    // Small delay to ensure all DOM nodes are mounted
+    const timer = setTimeout(() => {
+      const targets = main.querySelectorAll<HTMLElement>('.anim-scroll-item, .anim-scroll-section');
+      if (!targets.length) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-revealed');
+            }
+          });
+        },
+        {
+          threshold: 0.05,
+          rootMargin: '0px 0px -25px 0px'
+        }
+      );
+
+      targets.forEach((target) => observer.observe(target));
+
+      return () => {
+        observer.disconnect();
+      };
+    }, 40);
+
+    return () => clearTimeout(timer);
+  }, [activeRoute]);
+
   const isAdmin = activeRoute === 'admin';
   const ActiveComponent = ROUTE_COMPONENTS[activeRoute] || Home;
 

@@ -28,7 +28,11 @@ export const ProjectsPage: React.FC = () => {
             impact: 'Active Production'
           };
           return (
-            <article key={project.title} className="project-feature">
+            <article
+              key={project.title}
+              className="project-feature anim-scroll-item"
+              style={{ '--item-delay': `${index * 0.12}s` } as React.CSSProperties}
+            >
               <div className="project-number serif">0{index + 1}</div>
               <div className="project-main">
                 <p className="kicker">{feature.type}</p>

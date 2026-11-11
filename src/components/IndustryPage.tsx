@@ -19,7 +19,7 @@ export const IndustryPage: React.FC = () => {
         </p>
       </PageHeader>
 
-      <section className="wrap" aria-label="Professional Experience Timeline">
+      <section className="wrap anim-scroll-section" aria-label="Professional Experience Timeline">
         <TimelineList items={INDUSTRY_EXPERIENCE} />
       </section>
     </>

@@ -7096,4 +7096,449 @@ body {
   color: var(--muted);
 }
 
+/* ==========================================================================
+   SUBPAGE & COMPONENT ENTRANCE / SCROLL ANIMATION SUITE
+   Pages: Education, Research, Publication, Projects, Industry, Skills, Sphere
+   ========================================================================== */
+
+/* Page Header Staggered Entrance */
+.anim-page-header .anim-header-kicker {
+  animation: anim-kicker-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-page-header .anim-header-title {
+  animation: anim-title-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.08s;
+}
+
+.anim-page-header .anim-header-lede {
+  animation: anim-lede-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.16s;
+}
+
+@keyframes anim-kicker-in {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes anim-title-in {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes anim-lede-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Universal Scroll-Reveal Items */
+.anim-scroll-item {
+  opacity: 0;
+  transform: translateY(26px);
+  filter: blur(5px);
+  transition: opacity 0.72s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.72s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.72s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--item-delay, 0s);
+  will-change: opacity, transform, filter;
+}
+
+.anim-scroll-item.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* Fallback: if browser doesn't execute observer or user starts at top */
+.route-page .wrap:first-of-type .anim-scroll-item:not(.is-revealed) {
+  animation: anim-item-fallback 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--item-delay, 0.1s);
+}
+
+@keyframes anim-item-fallback {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   1. EDUCATION PAGE ANIMATIONS
+   -------------------------------------------------------------------------- */
+/* GPA Badge Shimmer */
+.timeline-gpa,
+.gpa-highlight {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--accent);
+  transition: all 0.25s ease;
+}
+
+.timeline-gpa::after,
+.gpa-highlight::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  animation: gpa-sheen-sweep 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes gpa-sheen-sweep {
+  0%, 60% {
+    left: -60%;
+  }
+  100% {
+    left: 140%;
+  }
+}
+
+/* Honors & Awards list card animations */
+.honor-list article {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease;
+}
+
+.honor-list article:hover {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 8px 8px 0px 0px var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.honor-list article:hover .mono {
+  background: var(--accent);
+  color: #ffffff !important;
+  transition: all 0.2s ease;
+}
+
+/* --------------------------------------------------------------------------
+   2. RESEARCH PAGE ANIMATIONS
+   -------------------------------------------------------------------------- */
+.research-area-grid article {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s ease,
+              border-color 0.28s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.research-area-grid article:hover {
+  transform: translate(-4px, -4px) !important;
+  box-shadow: 10px 10px 0px 0px var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.research-area-grid article:hover span.mono {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease;
+}
+
+/* --------------------------------------------------------------------------
+   3. PUBLICATIONS PAGE ANIMATIONS
+   -------------------------------------------------------------------------- */
+/* Filter Buttons */
+.filter-list button {
+  position: relative;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.filter-list button:hover:not(.active) {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.filter-list button.active {
+  transform: scale(1.04);
+  box-shadow: 0 4px 14px -2px rgba(59, 130, 246, 0.35);
+}
+
+/* Scholar callout */
+.scholar-callout {
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.scholar-callout:hover {
+  border-color: var(--accent);
+  box-shadow: 6px 6px 0px 0px var(--accent);
+  transform: translate(-2px, -2px);
+}
+
+/* Publication Paper Rows */
+.paper-row {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease;
+}
+
+.paper-row:hover {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 10px 10px 0px 0px var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Status Tag animated beacon */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.status::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: status-ping 2.2s infinite ease-in-out;
+}
+
+@keyframes status-ping {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.55;
+  }
+}
+
+.paper-link {
+  transition: all 0.2s ease;
+}
+
+.paper-link:hover {
+  color: var(--accent);
+}
+
+.paper-link:hover span {
+  display: inline-block;
+  transform: translate(2px, -2px);
+  transition: transform 0.2s ease;
+}
+
+/* --------------------------------------------------------------------------
+   4. PROJECTS PAGE ANIMATIONS
+   -------------------------------------------------------------------------- */
+.project-feature {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+  position: relative;
+}
+
+.project-feature:hover {
+  transform: translate(-4px, -4px) !important;
+  box-shadow: 12px 12px 0px 0px var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.project-feature:hover .project-number {
+  color: var(--accent);
+  transform: scale(1.05);
+  transition: all 0.25s ease;
+}
+
+.project-number {
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.project-stack-tag {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-stack-tag:hover {
+  transform: translateY(-2px);
+  background: var(--accent);
+  color: #ffffff !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.35);
+}
+
+.project-links a {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.project-links a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   5. INDUSTRY PAGE ANIMATIONS
+   -------------------------------------------------------------------------- */
+.timeline-item {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease;
+}
+
+.timeline-item:hover {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 10px 10px 0px 0px var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.timeline-period {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.timeline-item:hover .timeline-period {
+  color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   6. SKILLS PAGE ANIMATIONS
+   -------------------------------------------------------------------------- */
+.skills-ledger article.skill-card,
+.skill-card {
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.26s ease,
+              border-color 0.26s ease;
+}
+
+.skills-ledger article.skill-card:hover,
+.skill-card:hover {
+  transform: translateY(-4px) scale(1.01) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 14px 32px -4px rgba(59, 130, 246, 0.32) !important;
+}
+
+.skill-pill {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skill-pill:hover {
+  transform: translateY(-2px) scale(1.06);
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. 3D SPHERE ANIMATIONS
+   -------------------------------------------------------------------------- */
+.sphere-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 9999px;
+  padding: 5px 14px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  box-shadow: 0 4px 12px -2px var(--shadow-color);
+  margin-bottom: 12px;
+  transition: all 0.25s ease;
+}
+
+.sphere-beacon-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  animation: beacon-pulse 1.8s infinite ease-in-out;
+}
+
+@keyframes beacon-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 4px #10b981;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+    box-shadow: 0 0 12px 2px #10b981;
+  }
+}
+
+.skills-sphere-stage {
+  animation: sphere-ambient-float 6s infinite ease-in-out;
+}
+
+@keyframes sphere-ambient-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.sphere-badge {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.sphere-badge:hover,
+.sphere-badge.is-active {
+  z-index: 100 !important;
+  border-color: var(--badge-accent, #60a5fa) !important;
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.7),
+              0 0 30px -2px color-mix(in srgb, var(--badge-accent, #60a5fa) 65%, transparent),
+              inset 0 1px 2px rgba(255, 255, 255, 0.45) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-scroll-item,
+  .anim-page-header .anim-header-kicker,
+  .anim-page-header .anim-header-title,
+  .anim-page-header .anim-header-lede,
+  .skills-sphere-stage {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 

@@ -262,25 +262,25 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
   const [activeSkill, setActiveSkill] = useState<SkillItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // References for smooth 60-120fps physics loop with scroll scrub
+  // References for smooth 60-120fps physics loop with interactive mouse/touch drag
   const rotState = useRef({
     angleX: 0.16,
     angleY: -0.3,
     velX: 0,
     velY: 0,
-    targetVelX: 0.009,
-    targetVelY: 0.032,
+    targetVelX: 0.004,
+    targetVelY: 0.012,
     lastScrollY: 0,
-    scrollProgress: 0,
-    isStageActive: false,
     isPointerDown: false,
     pointerStartX: 0,
     pointerStartY: 0,
     lastPointerX: 0,
     lastPointerY: 0,
+    lastTime: 0,
+    flickVelY: 0,
+    flickVelX: 0,
+    dragDistance: 0,
     isHovered: false,
-    userDragOffsetX: 0,
-    userDragOffsetY: 0,
   });
 
   const items = SKILL_ITEMS;
@@ -363,21 +363,19 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
           const idleY = state.isHovered ? 0.0003 : (compact ? 0.0018 : (isMobile ? 0.0012 : 0.0014));
           const idleX = state.isHovered ? 0.0001 : (compact ? 0.0006 : 0.0004);
 
-          state.velY += (state.targetVelY - state.velY) * 0.05;
-          state.velX += (state.targetVelX - state.velX) * 0.05;
+          state.velY += (state.targetVelY - state.velY) * 0.08;
+          state.velX += (state.targetVelX - state.velX) * 0.08;
 
-          // Hard safety speed limiter so it can NEVER spin too fast
-          const maxAllowedSpeed = isMobile ? 0.020 : 0.026;
-          state.velY = Math.max(-maxAllowedSpeed, Math.min(maxAllowedSpeed, state.velY));
-          state.velX = Math.max(-maxAllowedSpeed * 0.5, Math.min(maxAllowedSpeed * 0.5, state.velX));
+          // Natural inertia friction decay (0.95 gives a silky-smooth, satisfying spin on mouse flick!)
+          state.targetVelY *= 0.95;
+          state.targetVelX *= 0.95;
 
           state.angleY += state.velY + idleY;
           state.angleX += state.velX + idleX;
-
-          // Controlled friction damping so it settles into a calm drift quickly
-          state.targetVelY *= 0.88;
-          state.targetVelX *= 0.88;
         }
+
+        // Clamp vertical pitch (-65deg to +65deg) so sphere never flips upside-down
+        state.angleX = Math.max(-1.15, Math.min(1.15, state.angleX));
 
         const cosX = Math.cos(state.angleX);
         const sinX = Math.sin(state.angleX);
@@ -551,16 +549,28 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     };
   }, [compact]);
 
-  // Pointer Drag handling to spin the sphere in any direction with touch flick momentum
+  // Pointer Drag handling to spin the sphere in any direction with responsive mouse flick momentum
   const handlePointerDown = (e: React.PointerEvent) => {
+    // Only drag on primary click or touch
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+
     rotState.current.isPointerDown = true;
     rotState.current.pointerStartX = e.clientX;
     rotState.current.pointerStartY = e.clientY;
     rotState.current.lastPointerX = e.clientX;
     rotState.current.lastPointerY = e.clientY;
+    rotState.current.lastTime = performance.now();
+    rotState.current.flickVelY = 0;
+    rotState.current.flickVelX = 0;
+    rotState.current.dragDistance = 0;
+    rotState.current.targetVelY = 0;
+    rotState.current.targetVelX = 0;
+    rotState.current.velY = 0;
+    rotState.current.velX = 0;
     setIsDragging(true);
+
     try {
-      (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
     } catch {
       // Ignored
     }
@@ -568,43 +578,64 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!rotState.current.isPointerDown) return;
+
     const dx = e.clientX - rotState.current.lastPointerX;
     const dy = e.clientY - rotState.current.lastPointerY;
     rotState.current.lastPointerX = e.clientX;
     rotState.current.lastPointerY = e.clientY;
 
-    const isTouch = e.pointerType === 'touch';
-    // Smooth 1:1 direct finger tracking without over-acceleration
-    const dragSensitivity = isTouch ? 0.0055 : 0.0055;
+    const totalDist = Math.hypot(e.clientX - rotState.current.pointerStartX, e.clientY - rotState.current.pointerStartY);
+    rotState.current.dragDistance = totalDist;
 
-    rotState.current.userDragOffsetY += dx * dragSensitivity;
-    rotState.current.userDragOffsetX -= dy * dragSensitivity;
+    const isTouch = e.pointerType === 'touch';
+    // Highly responsive, natural mouse and touch drag sensitivity
+    const dragSensitivity = isTouch ? 0.007 : 0.0085;
+
     rotState.current.angleY += dx * dragSensitivity;
     rotState.current.angleX -= dy * dragSensitivity;
+    rotState.current.angleX = Math.max(-1.15, Math.min(1.15, rotState.current.angleX));
+
+    // Measure instantaneous flick velocity
+    const now = performance.now();
+    const dt = Math.max(1, now - rotState.current.lastTime);
+    rotState.current.lastTime = now;
+
+    if (dt < 100) {
+      const instVelY = (dx / dt) * 0.16;
+      const instVelX = (-dy / dt) * 0.16;
+      rotState.current.flickVelY = rotState.current.flickVelY * 0.35 + instVelY * 0.65;
+      rotState.current.flickVelX = rotState.current.flickVelX * 0.35 + instVelX * 0.65;
+    } else {
+      rotState.current.flickVelY = 0;
+      rotState.current.flickVelX = 0;
+    }
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (rotState.current.isPointerDown) {
-      // Gentle release momentum capped to a calm, controlled drift
-      const isTouch = e.pointerType === 'touch';
-      const releaseDx = e.clientX - rotState.current.pointerStartX;
-      const releaseDy = e.clientY - rotState.current.pointerStartY;
-      const momentumMult = isTouch ? 0.00012 : 0.00018;
+      const now = performance.now();
+      const dtSinceLastMove = now - rotState.current.lastTime;
 
-      const flickY = releaseDx * momentumMult;
-      const flickX = -releaseDy * momentumMult * 0.4;
-      const maxFlick = isTouch ? 0.016 : 0.022;
+      // Only flick if user was actively moving mouse/finger right before release
+      if (dtSinceLastMove < 90 && rotState.current.dragDistance > 6) {
+        const isTouch = e.pointerType === 'touch';
+        const maxFlick = isTouch ? 0.024 : 0.038;
 
-      rotState.current.targetVelY = Math.max(-maxFlick, Math.min(maxFlick, flickY));
-      rotState.current.targetVelX = Math.max(-maxFlick * 0.5, Math.min(maxFlick * 0.5, flickX));
+        rotState.current.targetVelY = Math.max(-maxFlick, Math.min(maxFlick, rotState.current.flickVelY));
+        rotState.current.targetVelX = Math.max(-maxFlick * 0.5, Math.min(maxFlick * 0.5, rotState.current.flickVelX));
+      } else {
+        rotState.current.targetVelY = 0;
+        rotState.current.targetVelX = 0;
+      }
     }
 
     rotState.current.isPointerDown = false;
     setIsDragging(false);
+
     try {
-      (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+      (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
     } catch {
-      // Ignored if not captured
+      // Ignored
     }
   };
 
@@ -633,6 +664,7 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
               style={{ '--badge-accent': skill.color } as React.CSSProperties}
               onClick={(e) => {
                 e.stopPropagation();
+                if (rotState.current.dragDistance > 6) return;
                 setActiveSkill((prev) => (prev?.name === skill.name ? null : skill));
               }}
               onMouseEnter={() => {
@@ -708,6 +740,7 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
                 style={{ '--badge-accent': skill.color } as React.CSSProperties}
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (rotState.current.dragDistance > 6) return;
                   setActiveSkill((prev) => (prev?.name === skill.name ? null : skill));
                 }}
                 onMouseEnter={() => {

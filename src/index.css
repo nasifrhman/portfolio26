@@ -2359,7 +2359,14 @@ body {
 }
 
 .skills-sphere-stage.is-dragging {
-  cursor: grabbing;
+  cursor: grabbing !important;
+  animation-play-state: paused !important;
+}
+
+.skills-sphere-stage.is-dragging * {
+  cursor: grabbing !important;
+  pointer-events: none !important;
+  user-select: none !important;
 }
 
 .skills-sphere-canvas {

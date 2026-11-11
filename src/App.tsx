@@ -14,6 +14,7 @@ import { ProjectsPage } from './components/ProjectsPage';
 import { EducationPage } from './components/EducationPage';
 import { ContactsPage } from './components/ContactsPage';
 import { MagnifyingCursor } from './components/MagnifyingCursor';
+import { ScrollToTop } from './components/ScrollToTop';
 
 import { AdminDashboard } from './components/AdminDashboard';
 import { PortfolioProvider } from './context/PortfolioContext';
@@ -141,6 +142,7 @@ export const App: React.FC = () => {
             <ActiveComponent />
           </main>
           <Footer activeRoute={activeRoute} isHome={activeRoute === 'home'} />
+          <ScrollToTop />
         </>
       )}
     </PortfolioProvider>

@@ -362,8 +362,8 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
 
         // Dynamic sphere radius based on mode and container dimensions
         const radius = compact
-          ? Math.min(205, Math.max(130, Math.min(width, height) * 0.42))
-          : Math.min(250, Math.max(150, width * 0.30));
+          ? Math.min(205, Math.max(105, Math.min(width, height) * 0.38))
+          : Math.min(250, Math.max(125, Math.min(width * 0.30, height * 0.40)));
 
         const focalLength = compact ? 490 : 560;
 
@@ -558,7 +558,13 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     rotState.current.lastPointerX = e.clientX;
     rotState.current.lastPointerY = e.clientY;
     setIsDragging(true);
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    if (e.pointerType !== 'touch') {
+      try {
+        (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+      } catch {
+        // Ignored
+      }
+    }
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {

@@ -311,13 +311,19 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
       const deltaY = currentScrollY - rotState.current.lastScrollY;
       rotState.current.lastScrollY = currentScrollY;
 
-      // Dynamic responsive scroll spin (extra energetic on mobile touch screens)
+      // Gentle, calm scroll spin on both mobile and desktop
+      // Clamped so fast finger scrolling never causes rapid spinning
       const isMobile = window.innerWidth <= 768;
-      const scrollFactor = isMobile ? 0.0034 : 0.0016;
+      const scrollFactor = isMobile ? 0.00035 : 0.0005;
 
-      if (Math.abs(deltaY) > 0.4) {
-        rotState.current.targetVelY += deltaY * scrollFactor;
-        rotState.current.targetVelX += deltaY * (scrollFactor * 0.42);
+      if (Math.abs(deltaY) > 0.5) {
+        const deltaVelY = deltaY * scrollFactor;
+        const deltaVelX = deltaY * (scrollFactor * 0.35);
+
+        // Max velocity clamp to prevent high-speed spinning
+        const maxVel = isMobile ? 0.016 : 0.022;
+        rotState.current.targetVelY = Math.max(-maxVel, Math.min(maxVel, rotState.current.targetVelY + deltaVelY));
+        rotState.current.targetVelX = Math.max(-maxVel * 0.5, Math.min(maxVel * 0.5, rotState.current.targetVelX + deltaVelX));
       }
     };
 
@@ -352,18 +358,25 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
         const focalLength = compact ? 490 : 560;
 
         if (!state.isPointerDown) {
-          // Gentle ambient idle drift + inertia from page scroll velocity
-          const idleY = state.isHovered ? 0.0004 : (compact ? 0.0026 : 0.0016);
-          const idleX = state.isHovered ? 0.0001 : (compact ? 0.0009 : 0.0006);
+          // Gentle ambient idle drift + smooth velocity decay
+          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+          const idleY = state.isHovered ? 0.0003 : (compact ? 0.0018 : (isMobile ? 0.0012 : 0.0014));
+          const idleX = state.isHovered ? 0.0001 : (compact ? 0.0006 : 0.0004);
 
-          state.velY += (state.targetVelY - state.velY) * 0.06;
-          state.velX += (state.targetVelX - state.velX) * 0.06;
+          state.velY += (state.targetVelY - state.velY) * 0.05;
+          state.velX += (state.targetVelX - state.velX) * 0.05;
+
+          // Hard safety speed limiter so it can NEVER spin too fast
+          const maxAllowedSpeed = isMobile ? 0.020 : 0.026;
+          state.velY = Math.max(-maxAllowedSpeed, Math.min(maxAllowedSpeed, state.velY));
+          state.velX = Math.max(-maxAllowedSpeed * 0.5, Math.min(maxAllowedSpeed * 0.5, state.velX));
 
           state.angleY += state.velY + idleY;
           state.angleX += state.velX + idleX;
 
-          state.targetVelY *= 0.92;
-          state.targetVelX *= 0.92;
+          // Controlled friction damping so it settles into a calm drift quickly
+          state.targetVelY *= 0.88;
+          state.targetVelX *= 0.88;
         }
 
         const cosX = Math.cos(state.angleX);
@@ -561,8 +574,8 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     rotState.current.lastPointerY = e.clientY;
 
     const isTouch = e.pointerType === 'touch';
-    // Highly responsive touch drag multiplier for phone screens
-    const dragSensitivity = isTouch ? 0.012 : 0.0065;
+    // Smooth 1:1 direct finger tracking without over-acceleration
+    const dragSensitivity = isTouch ? 0.0055 : 0.0055;
 
     rotState.current.userDragOffsetY += dx * dragSensitivity;
     rotState.current.userDragOffsetX -= dy * dragSensitivity;
@@ -572,14 +585,18 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (rotState.current.isPointerDown) {
-      // Transfer release drag momentum into continuous rotation velocity (flick to spin on phone)
+      // Gentle release momentum capped to a calm, controlled drift
       const isTouch = e.pointerType === 'touch';
       const releaseDx = e.clientX - rotState.current.pointerStartX;
       const releaseDy = e.clientY - rotState.current.pointerStartY;
-      const momentumMult = isTouch ? 0.00085 : 0.00045;
+      const momentumMult = isTouch ? 0.00012 : 0.00018;
 
-      rotState.current.targetVelY = releaseDx * momentumMult;
-      rotState.current.targetVelX = -releaseDy * momentumMult * 0.5;
+      const flickY = releaseDx * momentumMult;
+      const flickX = -releaseDy * momentumMult * 0.4;
+      const maxFlick = isTouch ? 0.016 : 0.022;
+
+      rotState.current.targetVelY = Math.max(-maxFlick, Math.min(maxFlick, flickY));
+      rotState.current.targetVelX = Math.max(-maxFlick * 0.5, Math.min(maxFlick * 0.5, flickX));
     }
 
     rotState.current.isPointerDown = false;

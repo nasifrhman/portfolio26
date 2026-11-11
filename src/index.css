@@ -2230,14 +2230,32 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 24px 0 10px;
+  padding: 32px 0 16px;
   overflow: hidden;
   text-align: center;
-  background: radial-gradient(
-    ellipse 85% 60% at 50% 50%,
-    var(--ambient-accent) 0%,
-    transparent 72%
-  );
+}
+
+.standalone-sphere-container {
+  max-width: 520px;
+  height: 500px;
+  margin: 8px auto 0;
+}
+
+@media (max-width: 1023px) {
+  .standalone-sphere-container {
+    max-width: 400px;
+    height: 400px;
+  }
+}
+
+@media (max-width: 640px) {
+  .skills-sphere-section {
+    padding: 20px 0 8px !important;
+  }
+  .standalone-sphere-container {
+    max-width: 310px;
+    height: 280px;
+  }
 }
 
 .skills-sphere-header {
@@ -2359,14 +2377,7 @@ body {
 }
 
 .skills-sphere-stage.is-dragging {
-  cursor: grabbing !important;
-  animation-play-state: paused !important;
-}
-
-.skills-sphere-stage.is-dragging * {
-  cursor: grabbing !important;
-  pointer-events: none !important;
-  user-select: none !important;
+  cursor: grabbing;
 }
 
 .skills-sphere-canvas {

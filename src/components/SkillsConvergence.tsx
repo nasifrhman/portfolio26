@@ -255,32 +255,31 @@ export interface SkillsSphereProps {
 }
 
 export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false }) => {
-  const stageRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const badgeRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeSkill, setActiveSkill] = useState<SkillItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // References for smooth 60-120fps physics loop with interactive mouse/touch drag
+  // References for smooth 60-120fps physics loop with scroll scrub
   const rotState = useRef({
     angleX: 0.16,
     angleY: -0.3,
     velX: 0,
     velY: 0,
-    targetVelX: 0.004,
-    targetVelY: 0.012,
+    targetVelX: 0.009,
+    targetVelY: 0.032,
     lastScrollY: 0,
+    scrollProgress: 0,
+    isStageActive: false,
     isPointerDown: false,
     pointerStartX: 0,
     pointerStartY: 0,
     lastPointerX: 0,
     lastPointerY: 0,
-    lastTime: 0,
-    flickVelY: 0,
-    flickVelX: 0,
-    dragDistance: 0,
     isHovered: false,
+    userDragOffsetX: 0,
+    userDragOffsetY: 0,
   });
 
   const items = SKILL_ITEMS;
@@ -311,19 +310,13 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
       const deltaY = currentScrollY - rotState.current.lastScrollY;
       rotState.current.lastScrollY = currentScrollY;
 
-      // Gentle, calm scroll spin on both mobile and desktop
-      // Clamped so fast finger scrolling never causes rapid spinning
+      // Dynamic responsive scroll spin (extra energetic on mobile touch screens)
       const isMobile = window.innerWidth <= 768;
-      const scrollFactor = isMobile ? 0.00035 : 0.0005;
+      const scrollFactor = isMobile ? 0.0034 : 0.0016;
 
-      if (Math.abs(deltaY) > 0.5) {
-        const deltaVelY = deltaY * scrollFactor;
-        const deltaVelX = deltaY * (scrollFactor * 0.35);
-
-        // Max velocity clamp to prevent high-speed spinning
-        const maxVel = isMobile ? 0.016 : 0.022;
-        rotState.current.targetVelY = Math.max(-maxVel, Math.min(maxVel, rotState.current.targetVelY + deltaVelY));
-        rotState.current.targetVelX = Math.max(-maxVel * 0.5, Math.min(maxVel * 0.5, rotState.current.targetVelX + deltaVelX));
+      if (Math.abs(deltaY) > 0.4) {
+        rotState.current.targetVelY += deltaY * scrollFactor;
+        rotState.current.targetVelX += deltaY * (scrollFactor * 0.42);
       }
     };
 
@@ -350,32 +343,24 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
         const cx = width / 2;
         const cy = height / 2;
 
-        // Dynamic sphere radius based on mode and container dimensions
-        const radius = compact
-          ? Math.min(205, Math.max(105, Math.min(width, height) * 0.38))
-          : Math.min(250, Math.max(125, Math.min(width * 0.30, height * 0.40)));
-
-        const focalLength = compact ? 490 : 560;
+        // Dynamic sphere radius based on container dimensions
+        const radius = Math.min(205, Math.max(105, Math.min(width, height) * 0.38));
+        const focalLength = 490;
 
         if (!state.isPointerDown) {
-          // Gentle ambient idle drift + smooth velocity decay
-          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-          const idleY = state.isHovered ? 0.0003 : (compact ? 0.0018 : (isMobile ? 0.0012 : 0.0014));
-          const idleX = state.isHovered ? 0.0001 : (compact ? 0.0006 : 0.0004);
+          // Gentle ambient idle drift + inertia from page scroll velocity
+          const idleY = state.isHovered ? 0.0004 : 0.0024;
+          const idleX = state.isHovered ? 0.0001 : 0.0008;
 
-          state.velY += (state.targetVelY - state.velY) * 0.08;
-          state.velX += (state.targetVelX - state.velX) * 0.08;
-
-          // Natural inertia friction decay (0.95 gives a silky-smooth, satisfying spin on mouse flick!)
-          state.targetVelY *= 0.95;
-          state.targetVelX *= 0.95;
+          state.velY += (state.targetVelY - state.velY) * 0.06;
+          state.velX += (state.targetVelX - state.velX) * 0.06;
 
           state.angleY += state.velY + idleY;
           state.angleX += state.velX + idleX;
-        }
 
-        // Clamp vertical pitch (-65deg to +65deg) so sphere never flips upside-down
-        state.angleX = Math.max(-1.15, Math.min(1.15, state.angleX));
+          state.targetVelY *= 0.92;
+          state.targetVelX *= 0.92;
+        }
 
         const cosX = Math.cos(state.angleX);
         const sinX = Math.sin(state.angleX);
@@ -549,28 +534,16 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     };
   }, [compact]);
 
-  // Pointer Drag handling to spin the sphere in any direction with responsive mouse flick momentum
+  // Pointer Drag handling to spin the sphere in any direction with touch flick momentum
   const handlePointerDown = (e: React.PointerEvent) => {
-    // Only drag on primary click or touch
-    if (e.button !== 0 && e.pointerType === 'mouse') return;
-
     rotState.current.isPointerDown = true;
     rotState.current.pointerStartX = e.clientX;
     rotState.current.pointerStartY = e.clientY;
     rotState.current.lastPointerX = e.clientX;
     rotState.current.lastPointerY = e.clientY;
-    rotState.current.lastTime = performance.now();
-    rotState.current.flickVelY = 0;
-    rotState.current.flickVelX = 0;
-    rotState.current.dragDistance = 0;
-    rotState.current.targetVelY = 0;
-    rotState.current.targetVelX = 0;
-    rotState.current.velY = 0;
-    rotState.current.velX = 0;
     setIsDragging(true);
-
     try {
-      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+      (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
     } catch {
       // Ignored
     }
@@ -578,64 +551,39 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!rotState.current.isPointerDown) return;
-
     const dx = e.clientX - rotState.current.lastPointerX;
     const dy = e.clientY - rotState.current.lastPointerY;
     rotState.current.lastPointerX = e.clientX;
     rotState.current.lastPointerY = e.clientY;
 
-    const totalDist = Math.hypot(e.clientX - rotState.current.pointerStartX, e.clientY - rotState.current.pointerStartY);
-    rotState.current.dragDistance = totalDist;
-
     const isTouch = e.pointerType === 'touch';
-    // Highly responsive, natural mouse and touch drag sensitivity
-    const dragSensitivity = isTouch ? 0.007 : 0.0085;
+    // Highly responsive touch drag multiplier for phone screens
+    const dragSensitivity = isTouch ? 0.012 : 0.0065;
 
+    rotState.current.userDragOffsetY += dx * dragSensitivity;
+    rotState.current.userDragOffsetX -= dy * dragSensitivity;
     rotState.current.angleY += dx * dragSensitivity;
     rotState.current.angleX -= dy * dragSensitivity;
-    rotState.current.angleX = Math.max(-1.15, Math.min(1.15, rotState.current.angleX));
-
-    // Measure instantaneous flick velocity
-    const now = performance.now();
-    const dt = Math.max(1, now - rotState.current.lastTime);
-    rotState.current.lastTime = now;
-
-    if (dt < 100) {
-      const instVelY = (dx / dt) * 0.16;
-      const instVelX = (-dy / dt) * 0.16;
-      rotState.current.flickVelY = rotState.current.flickVelY * 0.35 + instVelY * 0.65;
-      rotState.current.flickVelX = rotState.current.flickVelX * 0.35 + instVelX * 0.65;
-    } else {
-      rotState.current.flickVelY = 0;
-      rotState.current.flickVelX = 0;
-    }
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (rotState.current.isPointerDown) {
-      const now = performance.now();
-      const dtSinceLastMove = now - rotState.current.lastTime;
+      // Transfer release drag momentum into continuous rotation velocity (flick to spin on phone)
+      const isTouch = e.pointerType === 'touch';
+      const releaseDx = e.clientX - rotState.current.pointerStartX;
+      const releaseDy = e.clientY - rotState.current.pointerStartY;
+      const momentumMult = isTouch ? 0.00085 : 0.00045;
 
-      // Only flick if user was actively moving mouse/finger right before release
-      if (dtSinceLastMove < 90 && rotState.current.dragDistance > 6) {
-        const isTouch = e.pointerType === 'touch';
-        const maxFlick = isTouch ? 0.024 : 0.038;
-
-        rotState.current.targetVelY = Math.max(-maxFlick, Math.min(maxFlick, rotState.current.flickVelY));
-        rotState.current.targetVelX = Math.max(-maxFlick * 0.5, Math.min(maxFlick * 0.5, rotState.current.flickVelX));
-      } else {
-        rotState.current.targetVelY = 0;
-        rotState.current.targetVelX = 0;
-      }
+      rotState.current.targetVelY = releaseDx * momentumMult;
+      rotState.current.targetVelX = -releaseDy * momentumMult * 0.5;
     }
 
     rotState.current.isPointerDown = false;
     setIsDragging(false);
-
     try {
-      (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+      (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
     } catch {
-      // Ignored
+      // Ignored if not captured
     }
   };
 
@@ -664,7 +612,6 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
               style={{ '--badge-accent': skill.color } as React.CSSProperties}
               onClick={(e) => {
                 e.stopPropagation();
-                if (rotState.current.dragDistance > 6) return;
                 setActiveSkill((prev) => (prev?.name === skill.name ? null : skill));
               }}
               onMouseEnter={() => {
@@ -691,86 +638,79 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     );
   }
 
-  // Full Standalone Section Mode (e.g. for dedicated skills explore)
+  // Full Standalone Section Mode (for dedicated #skills page)
   return (
-    <div ref={stageRef} className="skills-sphere-scroll-stage anim-scroll-section">
-      <div className="skills-sphere-sticky-viewport">
-        <section className="skills-sphere-section" aria-label="3D Interactive Skills Sphere">
-          {/* Editorial Header */}
-          <div className="skills-sphere-header wrap anim-scroll-item">
-            <div className={`sphere-status-pill mono anim-beacon-wrap ${activeSkill ? 'has-active' : ''}`}>
-              <span
-                className="sphere-beacon-dot"
-                style={activeSkill ? { background: activeSkill.color, boxShadow: `0 0 10px ${activeSkill.color}` } : undefined}
-              />
-              {activeSkill ? (
-                <span>ACTIVE: <strong style={{ color: activeSkill.color }}>{activeSkill.name}</strong></span>
-              ) : (
-                <span>LIVE 3D INTERACTIVE MATRIX • TAP &amp; DRAG</span>
-              )}
-            </div>
-            <h2 className="skills-sphere-title">
-              Technical <em>Skills Sphere.</em>
-            </h2>
-            <p className="skills-sphere-desc">
-              Tap any skill badge to inspect, or drag and scroll with your finger to rotate the stack in 3D.
-            </p>
-          </div>
-
-          {/* 3D Sphere Interactive Stage */}
-          <div
-            ref={containerRef}
-            className={`skills-sphere-stage anim-scroll-item ${isDragging ? 'is-dragging' : ''}`}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-          >
-            {/* Holographic Wireframe Canvas */}
-            <canvas ref={canvasRef} className="skills-sphere-canvas" />
-
-            {/* 3D Projected Skill Badges */}
-            {items.map((skill, idx) => (
-              <div
-                key={skill.name}
-                ref={(el) => {
-                  badgeRefs.current[idx] = el;
-                }}
-                className={`sphere-badge ${activeSkill?.name === skill.name ? 'is-active' : ''}`}
-                style={{ '--badge-accent': skill.color } as React.CSSProperties}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (rotState.current.dragDistance > 6) return;
-                  setActiveSkill((prev) => (prev?.name === skill.name ? null : skill));
-                }}
-                onMouseEnter={() => {
-                  rotState.current.isHovered = true;
-                  setActiveSkill(skill);
-                }}
-                onMouseLeave={() => {
-                  rotState.current.isHovered = false;
-                  setActiveSkill(null);
-                }}
-                title={skill.name}
-                aria-label={skill.name}
-              >
-                {/* Ambient Brand Halo */}
-                <div className="sphere-badge-glow" aria-hidden="true" />
-                {/* Specular Sheen */}
-                <div className="sphere-badge-sheen" aria-hidden="true" />
-
-                <div className="sphere-badge-icon" aria-hidden="true">
-                  {skill.icon}
-                </div>
-
-                {/* Micro Name Label */}
-                <span className="sphere-badge-label mono">{skill.name}</span>
-              </div>
-            ))}
-          </div>
-        </section>
+    <section className="skills-sphere-section wrap" aria-label="3D Interactive Skills Sphere">
+      {/* Editorial Header */}
+      <div className="skills-sphere-header">
+        <div className={`sphere-status-pill mono anim-beacon-wrap ${activeSkill ? 'has-active' : ''}`}>
+          <span
+            className="sphere-beacon-dot"
+            style={activeSkill ? { background: activeSkill.color, boxShadow: `0 0 10px ${activeSkill.color}` } : undefined}
+          />
+          {activeSkill ? (
+            <span>ACTIVE: <strong style={{ color: activeSkill.color }}>{activeSkill.name}</strong></span>
+          ) : (
+            <span>LIVE 3D INTERACTIVE MATRIX • TAP &amp; DRAG</span>
+          )}
+        </div>
+        <h2 className="skills-sphere-title">
+          Technical <em>Skills Sphere.</em>
+        </h2>
+        <p className="skills-sphere-desc">
+          Tap any skill badge to inspect, or drag and scroll with your finger to rotate the stack in 3D.
+        </p>
       </div>
-    </div>
+
+      {/* 3D Interactive Ball Container (Identical to Home Hero implementation) */}
+      <div className="hero-skills-ball-container standalone-sphere-container">
+        <div className="hero-skills-ambient-glow" aria-hidden="true" />
+        <div
+          ref={containerRef}
+          className={`skills-sphere-stage is-compact ${isDragging ? 'is-dragging' : ''}`}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+        >
+          {/* Holographic Wireframe Canvas */}
+          <canvas ref={canvasRef} className="skills-sphere-canvas" />
+
+          {/* 3D Projected Skill Badges */}
+          {items.map((skill, idx) => (
+            <div
+              key={skill.name}
+              ref={(el) => {
+                badgeRefs.current[idx] = el;
+              }}
+              className={`sphere-badge is-compact ${activeSkill?.name === skill.name ? 'is-active' : ''}`}
+              style={{ '--badge-accent': skill.color } as React.CSSProperties}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveSkill((prev) => (prev?.name === skill.name ? null : skill));
+              }}
+              onMouseEnter={() => {
+                rotState.current.isHovered = true;
+                setActiveSkill(skill);
+              }}
+              onMouseLeave={() => {
+                rotState.current.isHovered = false;
+                setActiveSkill(null);
+              }}
+              title={skill.name}
+              aria-label={skill.name}
+            >
+              <div className="sphere-badge-glow" aria-hidden="true" />
+              <div className="sphere-badge-sheen" aria-hidden="true" />
+              <div className="sphere-badge-icon" aria-hidden="true">
+                {skill.icon}
+              </div>
+              <span className="sphere-badge-label mono">{skill.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };
 

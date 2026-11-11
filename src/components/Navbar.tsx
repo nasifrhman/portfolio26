@@ -50,18 +50,33 @@ export const Navbar: React.FC<NavbarProps> = ({ activeRoute, theme = 'dark', onT
           ) : null}
         </nav>
 
-        <button
-          className={`menu-toggle${isOpen ? ' open' : ''}`}
-          type="button"
-          aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
-          aria-expanded={isOpen}
-          aria-controls="mobile-navigation"
-          onClick={() => setIsOpen((prev) => !prev)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
+        {/* Mobile Header Controls: Day/Night Theme Toggle & Expand Menu Button */}
+        <div className="mobile-header-controls">
+          {onToggleTheme ? (
+            <button
+              className="mobile-theme-btn"
+              type="button"
+              onClick={onToggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+          ) : null}
+
+          <button
+            className={`menu-toggle${isOpen ? ' open' : ''}`}
+            type="button"
+            aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
+            aria-expanded={isOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setIsOpen((prev) => !prev)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
       </div>
 
       <nav

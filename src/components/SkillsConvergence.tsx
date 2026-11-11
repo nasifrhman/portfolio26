@@ -311,29 +311,10 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
       const deltaY = currentScrollY - rotState.current.lastScrollY;
       rotState.current.lastScrollY = currentScrollY;
 
-      if (compact) {
-        // In Hero compact mode: page scroll smoothly rotates the ball
-        if (Math.abs(deltaY) > 0.5) {
-          rotState.current.targetVelY += deltaY * 0.0016;
-          rotState.current.targetVelX += deltaY * 0.0007;
-        }
-      } else {
-        // In full standalone mode: measure scroll progress through the stage
-        const stage = stageRef.current;
-        if (stage) {
-          const rect = stage.getBoundingClientRect();
-          const stageTop = rect.top;
-          const stageHeight = rect.height;
-          const viewportHeight = window.innerHeight;
-          const scrollDistance = stageHeight - viewportHeight;
-
-          if (scrollDistance > 0) {
-            const rawProgress = -stageTop / scrollDistance;
-            const progress = Math.max(0, Math.min(1, rawProgress));
-            rotState.current.scrollProgress = progress;
-            rotState.current.isStageActive = rawProgress >= -0.05 && rawProgress <= 1.05;
-          }
-        }
+      // Smooth scroll rotation: scrolling the page spins the ball smoothly
+      if (Math.abs(deltaY) > 0.5) {
+        rotState.current.targetVelY += deltaY * 0.0016;
+        rotState.current.targetVelX += deltaY * 0.0007;
       }
     };
 
@@ -367,14 +348,8 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
 
         const focalLength = compact ? 490 : 560;
 
-        if (!compact && state.isStageActive && !state.isPointerDown) {
-          const targetAngleY = state.scrollProgress * (Math.PI * 2.8) + state.userDragOffsetY;
-          const targetAngleX = 0.22 + Math.sin(state.scrollProgress * Math.PI) * 0.40 + state.userDragOffsetX;
-
-          state.angleY += (targetAngleY - state.angleY) * 0.075;
-          state.angleX += (targetAngleX - state.angleX) * 0.075;
-        } else if (!state.isPointerDown) {
-          // Gentle ambient idle drift
+        if (!state.isPointerDown) {
+          // Gentle ambient idle drift + inertia from page scroll velocity
           const idleY = state.isHovered ? 0.0004 : (compact ? 0.0026 : 0.0016);
           const idleX = state.isHovered ? 0.0001 : (compact ? 0.0009 : 0.0006);
 
@@ -649,7 +624,7 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
               Technical <em>Skills Sphere.</em>
             </h2>
             <p className="skills-sphere-desc">
-              Scroll slowly down to rotate the ball and view every skill one by one, or drag with your cursor to explore the stack in 3D.
+              Scroll or drag with your cursor or finger to explore the core tech stack in 3D.
             </p>
 
           </div>

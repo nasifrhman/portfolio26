@@ -262,14 +262,14 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
   const [activeSkill, setActiveSkill] = useState<SkillItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // References for smooth 60-120fps physics loop with scroll scrub
+  // References for smooth 60-120fps physics loop with gentle, low-speed rotation
   const rotState = useRef({
     angleX: 0.16,
     angleY: -0.3,
     velX: 0,
     velY: 0,
-    targetVelX: 0.009,
-    targetVelY: 0.032,
+    targetVelX: 0.001,
+    targetVelY: 0.005,
     lastScrollY: 0,
     scrollProgress: 0,
     isStageActive: false,
@@ -311,10 +311,15 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
       const deltaY = currentScrollY - rotState.current.lastScrollY;
       rotState.current.lastScrollY = currentScrollY;
 
-      // Smooth scroll rotation: scrolling the page spins the ball smoothly
+      // Low-speed, short-duration scroll impulse: capped to prevent hyper-spin
       if (Math.abs(deltaY) > 0.5) {
-        rotState.current.targetVelY += deltaY * 0.0016;
-        rotState.current.targetVelX += deltaY * 0.0007;
+        const clampedDelta = Math.max(-50, Math.min(50, deltaY));
+        rotState.current.targetVelY += clampedDelta * 0.00032;
+        rotState.current.targetVelX += clampedDelta * 0.00012;
+
+        // Strict speed cap
+        rotState.current.targetVelY = Math.max(-0.016, Math.min(0.016, rotState.current.targetVelY));
+        rotState.current.targetVelX = Math.max(-0.008, Math.min(0.008, rotState.current.targetVelX));
       }
     };
 
@@ -349,18 +354,19 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
         const focalLength = compact ? 490 : 560;
 
         if (!state.isPointerDown) {
-          // Gentle ambient idle drift + inertia from page scroll velocity
-          const idleY = state.isHovered ? 0.0004 : (compact ? 0.0026 : 0.0016);
-          const idleX = state.isHovered ? 0.0001 : (compact ? 0.0009 : 0.0006);
+          // Slow, serene ambient idle drift
+          const idleY = state.isHovered ? 0.0002 : (compact ? 0.0012 : 0.0008);
+          const idleX = state.isHovered ? 0.00005 : (compact ? 0.0004 : 0.0003);
 
-          state.velY += (state.targetVelY - state.velY) * 0.06;
-          state.velX += (state.targetVelX - state.velX) * 0.06;
+          state.velY += (state.targetVelY - state.velY) * 0.12;
+          state.velX += (state.targetVelX - state.velX) * 0.12;
 
           state.angleY += state.velY + idleY;
           state.angleX += state.velX + idleX;
 
-          state.targetVelY *= 0.92;
-          state.targetVelX *= 0.92;
+          // Quick deceleration to stop spinning quickly (reduced spin time)
+          state.targetVelY *= 0.82;
+          state.targetVelX *= 0.82;
         }
 
         const cosX = Math.cos(state.angleX);
@@ -549,10 +555,11 @@ export const SkillsConvergence: React.FC<SkillsSphereProps> = ({ compact = false
     rotState.current.lastPointerX = e.clientX;
     rotState.current.lastPointerY = e.clientY;
 
-    rotState.current.userDragOffsetY += dx * 0.005;
-    rotState.current.userDragOffsetX -= dy * 0.005;
-    rotState.current.angleY += dx * 0.005;
-    rotState.current.angleX -= dy * 0.005;
+    // Controlled, smooth drag speed
+    rotState.current.userDragOffsetY += dx * 0.0035;
+    rotState.current.userDragOffsetX -= dy * 0.0035;
+    rotState.current.angleY += dx * 0.0035;
+    rotState.current.angleX -= dy * 0.0035;
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
